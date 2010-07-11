@@ -38,22 +38,31 @@
 #include "RooPlot.h"
 #include "TGraphAsymmErrors.h"
 #include "RooFitResult.h"
+#include <fstream>
+#include "mystyle.h"
 using namespace RooFit;
+
+std::ofstream fout("store.txt");
+
 
 //-------------------------------------------------------------------------------------
 //----------------------------CLASS: POINT---------------------------------------------
 //-------------------------------------------------------------------------------------
 //A simple class to hold the data points in a graph.
 //A TGraph will simply be a vector of these objects.
+
 class point{
 public:
   point(double y, double x, double er, double el):val(y),xloc(x),hErr(er),lErr(el){
+    // if(y==0)hErr=0;
+    //std::cout<<"Constructor: "<<val<<";"<<xloc<<";"<<hErr<<";"<<lErr<<std::endl;
   }
   point(const point& p){
     this->xloc=p.xloc;
     this->val=p.val;
     this->hErr=p.hErr;
     this->lErr=p.lErr;
+    //std::cout<<"Copy Constructor: "<<val<<";"<<xloc<<";"<<hErr<<";"<<lErr<<std::endl;
   }
   ~point(){};
 
@@ -77,47 +86,20 @@ private:
 
 
 
-//-------------------------------------------------------------------------------------
-//------------------------------FXN: READGRAPH ----------------------------------------
-//-------------------------------------------------------------------------------------
-//Given a TGraph, convert it 
-//into a vector of "point" objects
-std::vector<point> ReadGraph(TGraph* g1){
-  std::vector<point> mypointvec;
-  const int num = g1->GetN();
-  for(int i=0; i<num; i++){
-
-    double hErr = g1->GetErrorYhigh(i);
-    double lErr = g1->GetErrorYlow(i);
-    if(hErr<0.000000001)hErr=0.0;
-    if(lErr<0.000000001)lErr=0.0;
-
-    double val ; 
-    double xloc ;
-    g1->GetPoint(i,xloc,val);
-    point mypoint(val,xloc,hErr,lErr);
-    mypointvec.push_back(mypoint);
-  }
-  return mypointvec;
-}
-
-double NEVTS=20000;
-
-
-
-
-
-
+double NEVTS=200;
 
 //-------------------------------------------------------------------------------------
 //------------------------------FXN: GENASSYGAUSS--------------------------------------
 //-------------------------------------------------------------------------------------
 //A function that would generate an assymetric gaussian
 //distribution, provided u give it the mean and wL, wR
+
 TH1D* GenAssyGauss(double mean, double sigL, double sigR){
   std::stringstream ss;
   ss<<"hist"<<mean<<"_"<<sigL<<"_"<<sigR;
+  //cout<<"hist "<<mean<<" _ "<<sigL<<" _ "<<sigR<<endl;
   std::string title=ss.str();
+
 
   //RooBiFurGauss seems to have a bug: does not like 0 as sigma(L or R)
   if(!sigL)sigL=0.0000000000000001;
@@ -137,11 +119,6 @@ TH1D* GenAssyGauss(double mean, double sigL, double sigR){
 }
 
 
-
-
-
-
-
 //-------------------------------------------------------------------------------------
 //-------------------------------FXN: DIVIDEHISTOS-------------------------------------
 //-------------------------------------------------------------------------------------
@@ -149,6 +126,7 @@ TH1D* GenAssyGauss(double mean, double sigL, double sigR){
 //histogram, divide them and fill the divided number into 
 //a third histogram. NEVT control the number of such events
 //generated
+
 
 TH1D* DivideHistos(TH1D* h1, TH1D* h2,std::string trigname,std::string WP){
   
@@ -177,15 +155,15 @@ TH1D* DivideHistos(TH1D* h1, TH1D* h2,std::string trigname,std::string WP){
 
   TCanvas* c1=new TCanvas(title11.c_str(),title11.c_str());
   c1->cd(1);
-  h2rndm->SetMarkerColor(4); 
+  h2rndm->SetMarkerColor(4);
   h2rndm->SetLineColor(4);
-  h2rndm->SetLineWidth(2);  
+  h2rndm->SetLineWidth(2);
   h2rndm->SetMarkerStyle(25);
   h2rndm->SetMarkerSize(0.8);
   h1rndm->SetMarkerColor(1);
   h1rndm->SetLineColor(1);
   h1rndm->SetLineWidth(2);
-  h1rndm->SetMarkerStyle(21);  
+  h1rndm->SetMarkerStyle(21);
   h1rndm->SetMarkerSize(0.8);
   h2rndm->Draw();
   h1rndm->Draw("same");
@@ -197,8 +175,31 @@ TH1D* DivideHistos(TH1D* h1, TH1D* h2,std::string trigname,std::string WP){
 }
 
 
+//-------------------------------------------------------------------------------------
+//------------------------------FXN: READGRAPH ----------------------------------------
+//-------------------------------------------------------------------------------------
+//Given a TGraph, convert it 
+//into a vector of "point" objects
 
+std::vector<point> ReadGraph(TGraph* g1){
+  std::vector<point> mypointvec;
+  const int num = g1->GetN();
+  for(int i=6; i<num; i++){
 
+    long double hErr = g1->GetErrorYhigh(i);
+    long double lErr = g1->GetErrorYlow(i);
+    if(hErr<0.000000001)hErr=0.0;
+    if(lErr<0.000000001)lErr=0.0;
+
+    double val ; 
+    double xloc ;
+    g1->GetPoint(i,xloc,val);
+    point mypoint(val,xloc,hErr,lErr);
+    mypointvec.push_back(mypoint);
+    fout<<"i: "<<i<<" xloc "<<xloc<<" val "<<val<<" hErr: "<<mypoint.hErr<<" lErr: "<<mypoint.lErr<<endl;
+  }
+  return mypointvec;
+}
 
 
 
@@ -211,7 +212,7 @@ TH1D* DivideHistos(TH1D* h1, TH1D* h2,std::string trigname,std::string WP){
 //distribution of corrfactor (for that point).
 //Then Fit this distribution.
 
-void toyMc(point p1, point p2,std::string trigname,std::string WP){
+void toyMc(point p1, point p2,std::ofstream* html,std::ofstream* latex,std::string trigname,std::string WP){
 
   double mean1 =p1.GetVal();
   double siH1=p1.GetHErr();
@@ -238,17 +239,22 @@ void toyMc(point p1, point p2,std::string trigname,std::string WP){
   RooRealVar corr("corr","Correction Factor",0,2);
   RooDataHist hCorr("hCorr","hCorr",corr,divided);
   double Mean=divided->GetMean();
+  cout<<"mean        "<<Mean<<endl;
 
-  RooRealVar meanA("mean","mean",Mean,Mean-0.5*Mean,Mean+0.5*Mean);
-  RooRealVar sigLA("sigL","sigL",0.,2.0);
-  RooRealVar sigRA("sigR","sigR",0.,2.0);
+  RooRealVar meanA("mean","mean",Mean,Mean-0.4*Mean,Mean+0.4*Mean);
+  RooRealVar sigLA("sigL","sigL",0.,1.6);//0.5,
+  RooRealVar sigRA("sigR","sigR",0.,1.6);//0.8,
 
+  double low=0.2;double high=1.8;
+//   if(mean1==1 && mean2==1) {meanA.setVal(1); meanA.setConstant(kTRUE);}
 
-  double low=0;double high=2.0;
-
+//   if((mean1>0.04 && mean1<0.30) ||(mean2>0.04 && mean2<0.30)) {low=0.2;high=1.8;}
+//   if((mean1>0.30 && mean1<0.92) ||(mean2>0.30 && mean2<0.92)) {low=0.;high=1.6;}
+//   if((mean1>0.92 || mean2>0.92)) {low=0.2;high=1.1;}
+  
   RooBifurGauss foo("foo","foo",corr,meanA,sigLA,sigRA);
   foo.fitTo(hCorr,RooFit::Range(low,high));
-    
+  
   std::stringstream ss3;
   ss3<<"Fitted_Corr_"<<loc1<<"_"<<loc2;
   std::string title3=ss3.str();
@@ -268,15 +274,12 @@ void toyMc(point p1, point p2,std::string trigname,std::string WP){
   cout<<"chi2---> "<<plot->chiSquare()<<endl;
   //meanA.Print("v");
   cout<<meanA.getVal()<<'\t'<<sigLA.getVal()<<'\t'<<sigRA.getVal()<<endl;
+  fout<<loc1<<", "<<loc2<<'\t'<<mean1<<'\t'<<mean2<<'\t'<<mean1/mean2<<'\t'
+      <<meanA.getVal()<<'\t'<<sigLA.getVal()<<'\t'<<sigRA.getVal()<<endl;
+  (*latex)<<"&$"<<loc1<<"$ & $"<<meanA.getVal()<<"^{+"<<sigRA.getVal()<<"}_{-"<<sigLA.getVal()<<"}$"<<endl<<"\\\\ \\hline"<<endl;
+  (*html)<<"<tr>\n<td>"<<loc1<<"<td>\n"<<meanA.getVal()<<"<td>\n"<<sigRA.getVal()<<"<td>\n"<<sigLA.getVal()<<"</tr>"<<endl;
 
 }
-
-
-
-
-
-
-
 
 
 //-------------------------------------------------------------------------------------
@@ -285,19 +288,18 @@ void toyMc(point p1, point p2,std::string trigname,std::string WP){
 //The toyMC function provided above does the study
 //for a single point, call it in a loop and do the
 //study for all the points in the efficiency graphs
-void toyMcOverAllPoints(std::vector<point>& gr1, std::vector<point>& gr2,std::string trigname,std::string WP){
+void toyMcOverAllPoints(std::vector<point>& gr1, std::vector<point>& gr2,std::ofstream* html,std::ofstream* latex,std::string trigname,std::string WP){
   int steps=0;
   if(gr1.size()>gr2.size())steps=gr2.size();
   else steps=gr1.size();
+  //cout<<"a hell situ. "<<gr1.size()<<'\t'<<gr2.size()<<'\t'<<steps<<endl;
   for(int i=0; i<steps; i++){
     point p1(gr1[i]);
     point p2(gr2[i]);
     if(gr1[i].GetVal()!=0 && gr2[i].GetVal()!=0 && (gr1[i].GetLoc()==gr2[i].GetLoc()))
-      toyMc(p1,p2,trigname,WP);
+      toyMc(p1,p2,html,latex,trigname,WP);
   }
 }
-
-
 
 
 
@@ -308,12 +310,27 @@ void toyMcOverAllPoints(std::vector<point>& gr1, std::vector<point>& gr2,std::st
 //files, create efficiency graphs...and then do
 //MC study for each point in the graph.
 void TOYMC(TString data,TString mc,std::string WP, std::string trigname){
+  G__loadfile("mystyle.h");
+  setTDRStyle();
+  gStyle->SetOptStat(0);
 
   std::string ht=WP+"_"+trigname+".html";
   std::string tx=WP+"_"+trigname+".tex";
+  std::ofstream* html=new ofstream(ht.c_str());
+  std::ofstream* latex=new ofstream(tx.c_str());
 
-  const int BinArraySize = 14;
-  Double_t Bins[BinArraySize] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 40,60};
+
+  fout<<"X location: Data, "<<" MC "<<'\t'<<"Effi.Data "<<" Effi.MC "
+      <<" Corr.Factor: Calculated,  From Fitting "<<'\t'<<" -sigma "<<'\t'<<" +sigma "<<endl;
+
+  (*latex)<<"\\documentclass[a4paper, 12pt]{article}\n\\usepackage{graphicx,amsmath,epsfig,color,amsfonts,multirow,relsize,rotating}\n\\begin{document}\n\\begin{table}[h]\n\\caption{Correction Factors in Barrel}\n\\begin{tabular}{|c|c|c|}\n\\hline\n&$SC E_{T}$ & $corrFac^{+hErr}_{-lErr}$ \\\\ \n &$[GeV]   $ & \\\\ \n \\hline\n"<<endl;
+  
+  (*html)<<"<html>\n<head>\n</head>\n<body>\n<table border=\"1\">\n<tr>\n<td> Et bin\n<td> Corr. Factor\n<td> +Unc.\n<td> -Unc.\n</tr>";
+
+
+
+  const int BinArraySize = 13;
+  Double_t Bins[BinArraySize] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 60};
   Int_t nBins = (Int_t) BinArraySize - 1;
 
   TFile *fileData=new TFile(data);
@@ -358,10 +375,7 @@ void TOYMC(TString data,TString mc,std::string WP, std::string trigname){
   std::vector<point> gr1 = ReadGraph(EffData);
   std::vector<point> gr2 = ReadGraph(EffMC);
   std::cout<<"========\n\n";
-  toyMcOverAllPoints(gr1,gr2,trigname,WP);
+  toyMcOverAllPoints(gr1,gr2,html,latex,trigname,WP);
+  (*latex)<<"\\end{tabular}\n  \\label{table:FCalFlux}\n\\end{table}\n\\end{document}\n";
+  (*html)<<"</table>\n</body>\n</html>\n";
 }
-
-
-//-------------------------------------------------------------------------------------
-//---------------------****END*****----------------------------------------------------
-//-------------------------------------------------------------------------------------
