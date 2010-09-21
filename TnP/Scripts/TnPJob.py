@@ -153,7 +153,7 @@ theOutputFile.write(code)
 ##################################################################
 
 fitterFile = ''
-inputFile = open('testTagProbeFitTreeAnalyzer_Zee.py','r')
+inputFile = open('mytestTagProbeFitTreeAnalyzer_Zee.py','r')
 for line in inputFile:
     fitterFile=fitterFile+line
 
