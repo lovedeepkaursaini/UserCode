@@ -281,7 +281,12 @@ string TagProbeFitter::calculateEfficiency(string dirName, vector<string> effCat
     
     cout<<"Fitting bin:  "<<dirName<<endl;
     //make a directory for each bin
-    gDirectory->mkdir(dirName)->cd();
+    // gDirectory->mkdir(dirName)->cd();
+    TDirectory *dir = (TDirectory *) gDirectory->Get(dirName);
+    if (!dir) dir = gDirectory->mkdir(dirName,dirName);
+    dir->cd();
+
+
     //create a workspace
     RooWorkspace* w = new RooWorkspace();
     //import the data
@@ -330,7 +335,10 @@ string TagProbeFitter::calculateEfficiency(string dirName, vector<string> effCat
   
   //save the efficiency data
   fitEfficiency.Write();
-  gDirectory->mkdir("fit_eff_plots")->cd();
+  //gDirectory->mkdir("fit_eff_plots")->cd();
+  TDirectory *dir = (TDirectory *) gDirectory->Get("fit_eff_plots");
+  if (!dir) dir = gDirectory->mkdir("fit_eff_plots","fit_eff_plots");
+  dir->cd();
   saveEfficiencyPlots(fitEfficiency, effName, binnedVariables, mappedCategories);
   gDirectory->cd("..");
 
@@ -340,7 +348,10 @@ string TagProbeFitter::calculateEfficiency(string dirName, vector<string> effCat
   gDirectory->cd("..");*/
 
   cntEfficiency.Write();
-  gDirectory->mkdir("cnt_eff_plots")->cd();
+  //gDirectory->mkdir("cnt_eff_plots")->cd();
+  dir = (TDirectory *) gDirectory->Get("cnt_eff_plots");
+  if (!dir) dir = gDirectory->mkdir("cnt_eff_plots","cnt_eff_plots");
+  dir->cd();
   saveEfficiencyPlots(cntEfficiency, effName, binnedVariables, mappedCategories);
   gDirectory->cd("..");
   //empty string means no error
@@ -424,6 +435,7 @@ void TagProbeFitter::doFitEfficiency(RooWorkspace* w, string pdfName, RooRealVar
 
 
   // save everything
+  outputFile->cd();
   res->Write("fitresults");
   w->saveSnapshot("finalState",w->components());
   saveFitPlot(w);
@@ -466,10 +478,10 @@ void TagProbeFitter::createPdf(RooWorkspace* w, vector<string>& pdfCommands){
     w->factory(pdfCommands[i].c_str());
   }
   // setup the simultaneous extended pdf
-  w->factory("expr::numSignalPass('efficiency*numSignalAll', efficiency, numSignalAll[0.,1e10])");
+  w->factory("expr::numSignalPass('efficiency*numSignalAll', efficiency, numSignalAll[0,1e10])");
   w->factory("expr::numSignalFail('(1-efficiency)*numSignalAll', efficiency, numSignalAll)");
-  w->factory("SUM::pdfPass(numSignalPass*signal, numBackgroundPass[0.,1e10]*backgroundPass)");
-  w->factory("SUM::pdfFail(numSignalFail*signal, numBackgroundFail[0.,1e10]*backgroundFail)");
+  w->factory("SUM::pdfPass(numSignalPass*signal, numBackgroundPass[0,1e10]*backgroundPass)");
+  w->factory("SUM::pdfFail(numSignalFail*signal, numBackgroundFail[0,1e10]*backgroundFail)");
   w->factory("SIMUL::simPdf(_efficiencyCategory_, Passed=pdfPass, Failed=pdfFail)");
   // signalFractionInPassing is not used in the fit just to set the initial values
   if(w->var("signalFractionInPassing") == 0)
@@ -511,6 +523,10 @@ void TagProbeFitter::setInitialValues(RooWorkspace* w){
     w->var("numBackgroundFail")->setConstant(false);
   }
 
+  // if signal fraction is 1 then set the number of background events to 0.
+  RooRealVar* fBkgPass = w->var("numBackgroundPass");
+  if(signalFractionInPassing==1.0) { fBkgPass->setVal(0.0); fBkgPass->setConstant(true); }
+
   // save initial state for reference
   w->saveSnapshot("initialState",w->components());
 }
@@ -533,7 +549,7 @@ void TagProbeFitter::saveFitPlot(RooWorkspace* w){
   if(!mass) return;
   // make a 2x2 canvas
   TCanvas canvas("fit_canvas");
-  canvas.Divide(2,2);
+  canvas.Divide(2,1);
   vector<RooPlot*> frames;
   // plot the Passing Probes
   canvas.cd(1);
@@ -557,7 +573,7 @@ void TagProbeFitter::saveFitPlot(RooWorkspace* w){
   pdf.plotOn(frames[1], Slice(efficiencyCategory, "Failed"), ProjWData(*dataFail), LineColor(kRed), Components("backgroundFail"), LineStyle(kDashed));
   frames[1]->Draw();
   // plot the All Probes
-  canvas.cd(3);
+/*  canvas.cd(3);
   dataAll->plotOn(frames.back());
   pdf.plotOn(frames.back(), ProjWData(*dataAll), LineColor(kBlue));
   pdf.plotOn(frames.back(), ProjWData(*dataAll), LineColor(kBlue), Components("backgroundPass,backgroundFail"), LineStyle(kDashed));
@@ -567,7 +583,7 @@ void TagProbeFitter::saveFitPlot(RooWorkspace* w){
   frames.push_back(mass->frame(Name("Fit Results"), Title("Fit Results")));
   pdf.paramOn(frames.back(), dataAll, "", 0, "NELU", 0.1, 0.9, 0.9);
   // draw only the parameter box not the whole frame
-  frames.back()->findObject(Form("%s_paramBox",pdf.GetName()))->Draw();
+  frames.back()->findObject(Form("%s_paramBox",pdf.GetName()))->Draw();*/
   //save and clean up
   canvas.Write();
   for (size_t i=0; i<frames.size(); i++) {
@@ -883,3 +899,5 @@ int main(int argc, char* argv[]){
 
   f.calculateEfficiency("pt_eta_mcTrue", "passing_idx", "pass", unbinnedVariables, binnedReals, binnedStates, emptyMap, true);
 }
+
+
