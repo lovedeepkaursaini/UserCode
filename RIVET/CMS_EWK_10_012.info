@@ -1,0 +1,28 @@
+Name: CMS_EWK_10_012
+Year: 2011
+Summary: Rates of Jets Produced in Association with W and Z Bosons in pp Collisions at sqrt(s) = 7 TeV
+Experiment: CMS
+Collider: LHC
+SpiresID: CDS Record: ------
+Status: UNVALIDATED
+Authors:
+ - Lovedeep Kaur Saini  <lovedeep@cern.ch>
+ - Anil Pratap Singh  <anil@cern.ch>
+References:
+ - http://cms.cern.ch/iCMS/analysisadmin/get?analysis=EWK-10-012-paper-v1.pdf
+RunInfo:
+  <Insert event types (not gen-specific), energy, any kinematic
+  efficiency cut(s) that may be needed, essentially any details needed to set
+  up a generator to reproduce the data.>
+NumEvents: <Insert typical number of events needed for good statistics.>
+Beams: [p+, p+]
+Energies: [7000]
+PtCuts: <Insert list of kinematic pT cuts in GeV, e.g. [0, 20]>
+Description:
+  'A study of jet production in association with W and Z bosons for a jet transverse momentum threshold of 30 GeV, using 35.9 ± 1.4 pb−1 of
+proton-proton collision data at 7 TeV cms energy has been done. The study includes the measurement of the normalized inclusive rates of jets produced, as well as the ratios of cross-sections and the first test of the Berends-Giele scaling at sqrt(s) = 7 TeV.'
+BibKey: <Insert SPIRES BibTeX key>
+BibTeX: '<Insert SPIRES BibTeX block>'
+ToDo:
+ - need to discuss with experts
+
