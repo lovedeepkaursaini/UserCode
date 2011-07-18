@@ -55,28 +55,25 @@ namespace Rivet {
       addProjection(vfs, "VFS");
       addProjection(FastJets(vfs, FastJets::ANTIKT, 0.5), "Jets");
       
-      for (int i = 0; i < 4; ++i) {
-	_histJetMultNoverNm1Welec[i]   = bookDataPointSet(2,i+1,i+1);
-	_histJetMultNoverN0Welec[i] = bookDataPointSet(1, i+1, i+1);
-        _histJetMultNoverNm1Wmu[i]   = bookDataPointSet(4,i+1,i+1);
-        _histJetMultNoverN0Wmu[i] = bookDataPointSet(3, i+1, i+1);
-        _histJetMultRatioWmuPlusMinus[i] = bookDataPointSet(10, i+1, i+1);
-	_histJetMultRatioWelPlusMinus[i] = bookDataPointSet(9, i+1, i+1);
-	_histJetMultNoverNm1Zelec[i]   = bookDataPointSet(6,i+1,i+1);
-	_histJetMultNoverN0Zelec[i] = bookDataPointSet(5, i+1, i+1);
-	_histJetMultNoverNm1Zmu[i]     = bookDataPointSet(8,i+1,i+1);
-	_histJetMultNoverN0Zmu[i]   = bookDataPointSet(7, i+1, i+1);
-      }
+      _histNoverN0Welec = bookDataPointSet(1,1,1);   
+      _histNoverNm1Welec = bookDataPointSet(2,1,1);   
+      _histNoverN0Wmu = bookDataPointSet(3,1,1);
+      _histNoverNm1Wmu = bookDataPointSet(4,1,1);   
+      _histNoverN0Zelec = bookDataPointSet(5,1,1);   
+      _histNoverNm1Zelec = bookDataPointSet(6,1,1);   
+      _histNoverN0Zmu = bookDataPointSet(7,1,1);   
+      _histNoverNm1Zmu = bookDataPointSet(8,1,1);   
+      _histJetMultWelec  = bookHistogram1D("njetWenu", 5, -0.5, 4.5);
+      _histJetMultWmu    = bookHistogram1D("njetWmunu", 5, -0.5, 4.5);
+      _histJetMultZelec  = bookHistogram1D("njetZee", 5, -0.5, 4.5);
+      _histJetMultZmu    = bookHistogram1D("njetZmumu", 5, -0.5, 4.5);
 
-      _histJetMultWelec  = bookHistogram1D("njetWenu", 7, -0.5, 6.5);
-      _histJetMultWmu    = bookHistogram1D("njetWmunu", 7, -0.5, 6.5);
-      _histJetMultZelec  = bookHistogram1D("njetZee", 7, -0.5, 6.5);
-      _histJetMultZmu    = bookHistogram1D("njetZmumu", 7, -0.5, 6.5);
-
-      _histJetMultWmuPlus = bookHistogram1D("njetWmuPlus", 7, -0.5, 6.5);
-      _histJetMultWmuMinus = bookHistogram1D("njetWmuMinus", 7, -0.5, 6.5);
-      _histJetMultWelPlus = bookHistogram1D("njetWePlus", 7, -0.5, 6.5);
-      _histJetMultWelMinus = bookHistogram1D("njetWeMinus", 7, -0.5, 6.5);
+      _histJetMultWmuPlus = bookHistogram1D("njetWmuPlus", 5, -0.5, 4.5);
+      _histJetMultWmuMinus = bookHistogram1D("njetWmuMinus", 5, -0.5, 4.5);
+      _histJetMultWelPlus = bookHistogram1D("njetWePlus", 5, -0.5, 4.5);
+      _histJetMultWelMinus = bookHistogram1D("njetWeMinus", 5, -0.5, 4.5);
+        _histJetMultRatioWmuPlusMinus = bookDataPointSet(10, 1, 1);
+	_histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
 
     } 
 
@@ -119,34 +116,40 @@ namespace Rivet {
       }
     }  
     
-    
-    void FillHistogramSet(  AIDA::IHistogram1D*& _histJetMult, AIDA::IDataPointSet* _histJetMultNoverNm1[4], AIDA::IDataPointSet* _histJetMultNoverN0[4] ){
-      for (int i = 0; i < 4; ++i) {
-	std::vector<double> xval; xval.push_back(i+1);
-	std::vector<double> xerr; xerr.push_back(.5);      
-	double ratioNtoNminus1=0;       
-	double ratioNtoNzero=0;      
-	double frac_errNminus1 = 0.;   
-	double frac_errNtoNzero = 0.;
-	CalculateRatioAndErrors(_histJetMult, i, ratioNtoNminus1, ratioNtoNzero, frac_errNminus1, frac_errNtoNzero);       
-/*
-	std::cout<<"(njet >= "<<i+1<<")/(njet >="<<i<<") ratio: "<<ratioNtoNminus1<<"\t";	
-	std::cout<<"(njet >= "<<i+1<<")/(njet >="<<0<<") ratio: "<<ratioNtoNzero<<"\n";	
-*/	
-	std::vector<double> yval;yval.push_back(ratioNtoNminus1);        
-	std::vector<double> yerr;yerr.push_back(ratioNtoNminus1*frac_errNminus1);    
-	std::vector<double> yval2;yval2.push_back(ratioNtoNzero);            
-	std::vector<double> yerr2;yerr2.push_back(ratioNtoNzero*frac_errNtoNzero);    
-        
-	_histJetMultNoverNm1[i]->setCoordinate(0,xval,xerr);              
-	_histJetMultNoverNm1[i]->setCoordinate(1,yval,yerr);           
-	_histJetMultNoverN0[i]->setCoordinate(0,xval,xerr);         
-	_histJetMultNoverN0[i]->setCoordinate(1,yval2,yerr2);        
-        }                      
-    }
+    void FillNoverNm1(AIDA::IHistogram1D*& _histJetMult,AIDA::IDataPointSet* _histNoverNm1){
+      std::vector<double> y, yerr;
+      for (int i=0; i<_histJetMult->axis().bins()-1; i++) {
+        double val = 0.;
+        double err = 0.;
+        if (!fuzzyEquals(_histJetMult->binHeight(i), 0)) {
+          val = _histJetMult->binHeight(i+1) / _histJetMult->binHeight(i);
+          err = val * sqrt(  pow(_histJetMult->binError(i+1)/_histJetMult->binHeight(i+1), 2)
+                           + pow(_histJetMult->binError(i)  /_histJetMult->binHeight(i)  , 2) );
+        }
+        y.push_back(val);
+        yerr.push_back(err);
+      }
+      _histNoverNm1->setCoordinate(1, y, yerr);
+    }    
+    void FillNoverN0(AIDA::IHistogram1D*& _histJetMult,AIDA::IDataPointSet* _histNoverN0){
+      std::vector<double> y, yerr;
+      for (int i=0; i<_histJetMult->axis().bins()-1; i++) {
+        double val = 0.;
+        double err = 0.;
+        if (!fuzzyEquals(_histJetMult->binHeight(i), 0)) {
+          val = _histJetMult->binHeight(i+1) / _histJetMult->binHeight(0);
+          err = val * sqrt(  pow(_histJetMult->binError(i+1)/_histJetMult->binHeight(i+1), 2)
+                           + pow(_histJetMult->binError(0)  /_histJetMult->binHeight(0)  , 2) );
+        }
+        y.push_back(val);
+        yerr.push_back(err);
+      }
+      _histNoverN0->setCoordinate(1, y, yerr);
+    }    
 
     
-   void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12[4] ){
+   void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
+      std::vector<double> yval, yerr;
       for (int i = 0; i < 4; ++i) {
         std::vector<double> xval; xval.push_back(i);
         std::vector<double> xerr; xerr.push_back(.5);
@@ -168,41 +171,13 @@ namespace Rivet {
 
         err = std::sqrt(errDen+errNum);
 	if(!(err==err))err=0;
-//	std::cout<<ratio<<"\t"<<err<<std::endl;
-        std::vector<double> yval;yval.push_back(ratio);
-        std::vector<double> yerr;yerr.push_back(ratio*err);
-        _histJetMultRatio12[i]->setCoordinate(0,xval,xerr);
-        _histJetMultRatio12[i]->setCoordinate(1,yval,yerr);
+        yval.push_back(ratio);
+        yerr.push_back(ratio*err);
+        }
+        _histJetMultRatio12->setCoordinate(1,yval,yerr);
       }
-    }
+    
 
-
-    void CalculateRatioAndErrors( AIDA::IHistogram1D*& _histJetMult, int i, double& ratioNtoNminus1, double& ratioNtoNzero, 
-				  double& frac_errNminus1, double& frac_errNtoNzero ){       
-      double errorTermForZeroJet = 0;
-      if (_histJetMult->binHeight(i) > 0.)      
-	ratioNtoNminus1 = _histJetMult->binHeight(i+1)/_histJetMult->binHeight(i);             
-      if (_histJetMult->binHeight(0) > 0.) {
-	ratioNtoNzero = _histJetMult->binHeight(i+1)/_histJetMult->binHeight(0);       
-      }
-      double errCont0 = 0, errCont1=0;      
-      
-      if (_histJetMult->binHeight(i) > 0.) {                                                                                                  
-	double delMult0 = _histJetMult->binError(i);
-	double mult0 = _histJetMult->binHeight(i);    
-	errCont0 = delMult0/mult0;   
-      }
-      if(i==0)errorTermForZeroJet =  errCont0;
-      
-      if (_histJetMult->binHeight(i+1)>0 ){     
-	double delMult = _histJetMult->binError(i+1);     
-	double mult = _histJetMult->binHeight(i+1);     
-	errCont1 = delMult/mult;      
-      }     
-      
-      frac_errNminus1 = std::sqrt(errCont0*errCont0 + errCont1* errCont1);         
-      frac_errNtoNzero = std::sqrt(errorTermForZeroJet*errorTermForZeroJet + errCont1* errCont1);      
-    }    
 
 
     void analyze(const Event& event) {
@@ -328,6 +303,7 @@ namespace Rivet {
 	      else  finaljet_list.push_back(j.momentum());
 	  }
       }
+
       //Multiplicity plots.	
       if(isWen)Fill(_histJetMultWelec, weight, finaljet_list);
       if(isWmn)Fill(_histJetMultWmu, weight, finaljet_list);
@@ -342,43 +318,43 @@ namespace Rivet {
     
     /// Normalise histograms etc., after the run
     void finalize() {
-//      std::cout<<"For the Z->mm case: \n";
-      FillHistogramSet(_histJetMultZmu,  _histJetMultNoverNm1Zmu,  _histJetMultNoverN0Zmu);
-//      std::cout<<"For the Z->ee case: \n";
-      FillHistogramSet(_histJetMultZelec,_histJetMultNoverNm1Zelec,_histJetMultNoverN0Zelec);
-//      std::cout<<"For the W->en case: \n";
-      FillHistogramSet(_histJetMultWelec,_histJetMultNoverNm1Welec,_histJetMultNoverN0Welec);
-//      std::cout<<"For the W->mn case: \n";
-      FillHistogramSet(_histJetMultWmu,_histJetMultNoverNm1Wmu,_histJetMultNoverN0Wmu);
+      FillNoverNm1(_histJetMultWelec,_histNoverNm1Welec);
+      FillNoverN0(_histJetMultWelec,_histNoverN0Welec);
+      FillNoverNm1(_histJetMultWmu,_histNoverNm1Wmu);
+      FillNoverN0(_histJetMultWmu,_histNoverN0Wmu);
+      FillNoverNm1(_histJetMultZelec,_histNoverNm1Zelec);
+      FillNoverN0(_histJetMultZelec,_histNoverN0Zelec);
+      FillNoverNm1(_histJetMultZmu,_histNoverNm1Zmu);
+      FillNoverN0(_histJetMultZmu,_histNoverN0Zmu);
       FillChargeAssymHistogramSet(_histJetMultWmuPlus,_histJetMultWmuMinus, _histJetMultRatioWmuPlusMinus);
       FillChargeAssymHistogramSet(_histJetMultWelPlus,_histJetMultWelMinus, _histJetMultRatioWelPlusMinus);
     }
 
   private:
 
-    AIDA::IDataPointSet* _histJetMultNoverNm1Welec[4];
-    AIDA::IDataPointSet* _histJetMultNoverN0Welec[4];  
     AIDA::IHistogram1D*  _histJetMultWelec;
+    AIDA::IDataPointSet* _histNoverNm1Welec;          // n/(n-1)
+    AIDA::IDataPointSet* _histNoverN0Welec;          // n/n(0)
     
-    AIDA::IDataPointSet* _histJetMultNoverNm1Wmu[4];
-    AIDA::IDataPointSet* _histJetMultNoverN0Wmu[4];  
     AIDA::IHistogram1D*  _histJetMultWmu;
+    AIDA::IDataPointSet* _histNoverNm1Wmu;          // n/(n-1)
+    AIDA::IDataPointSet* _histNoverN0Wmu;          // n/n(0)
 
     AIDA::IHistogram1D*  _histJetMultWelMinus;
     AIDA::IHistogram1D*  _histJetMultWelPlus;
-    AIDA::IDataPointSet* _histJetMultRatioWelPlusMinus[4];
+    AIDA::IDataPointSet* _histJetMultRatioWelPlusMinus;
     
     AIDA::IHistogram1D*  _histJetMultWmuMinus;
     AIDA::IHistogram1D*  _histJetMultWmuPlus;
-    AIDA::IDataPointSet* _histJetMultRatioWmuPlusMinus[4];
+    AIDA::IDataPointSet* _histJetMultRatioWmuPlusMinus;
    
-    AIDA::IDataPointSet* _histJetMultNoverNm1Zelec[4];
-    AIDA::IDataPointSet* _histJetMultNoverN0Zelec[4];  
     AIDA::IHistogram1D*  _histJetMultZelec;
+    AIDA::IDataPointSet* _histNoverNm1Zelec;          // n/(n-1)
+    AIDA::IDataPointSet* _histNoverN0Zelec;          // n/n(0)
 
-    AIDA::IDataPointSet* _histJetMultNoverNm1Zmu[4];
-    AIDA::IDataPointSet* _histJetMultNoverN0Zmu[4];  
     AIDA::IHistogram1D*  _histJetMultZmu;
+    AIDA::IDataPointSet* _histNoverNm1Zmu;          // n/(n-1)
+    AIDA::IDataPointSet* _histNoverN0Zmu;          // n/n(0)
   };
   
   AnalysisBuilder<CMS_EWK_10_012> plugin_CMS_EWK_10_012;
