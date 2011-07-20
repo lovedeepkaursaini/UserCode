@@ -201,15 +201,15 @@ namespace Rivet {
       isW  = (invMassFinalStateZ.empty() && !(invMassFinalStateW.empty()));
       isZ  = (!(invMassFinalStateZ.empty()) && invMassFinalStateW.empty());
 
-      const ParticleVector&  ZDecayProducts =  invMassFinalStateZ.particles();
-      const ParticleVector&  WDecayProducts =  invMassFinalStateW.particles();
+      const ParticleVector&  ZDecayProducts =  invMassFinalStateZ.particlesByPt();
+      const ParticleVector&  WDecayProducts =  invMassFinalStateW.particlesByPt();
 
       if (ZDecayProducts.size() < 2 && WDecayProducts.size() <2) vetoEvent;
       
       double pt1=-9999.,  pt2=-9999.;
       double phi1=-9999., phi2=-9999.;
       double eta1=-9999., eta2=-9999.;
-      
+
       double mt = 999999;
       if(isZ){
 	pt1  = ZDecayProducts[0].momentum().pT();
