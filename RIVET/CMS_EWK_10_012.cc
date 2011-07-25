@@ -9,6 +9,7 @@
 #include "Rivet/Projections/VetoedFinalState.hh"
 #include "Rivet/Projections/InvMassFinalState.hh"
 #include "Rivet/Tools/ParticleIdUtils.hh"
+#include "Rivet/Projections/LeadingParticlesFinalState.hh"
 
 
 namespace Rivet {
@@ -31,27 +32,43 @@ namespace Rivet {
       const FinalState fs(-MAXRAPIDITY,MAXRAPIDITY);
       addProjection(fs, "FS");
       
-      vector<pair<PdgId,PdgId> > vidsZ;
-      vidsZ.push_back(make_pair(ELECTRON, POSITRON));
-      vidsZ.push_back(make_pair(MUON, ANTIMUON));
-
-      FinalState fsZ(-MAXRAPIDITY,MAXRAPIDITY);
-      InvMassFinalState invfsZ(fsZ, vidsZ, 60*GeV, 120*GeV);
-      addProjection(invfsZ, "INVFSZ");
+      // Zee
+      LeadingParticlesFinalState ZeeFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      ZeeFS.addParticleIdPair(ELECTRON);
+      addProjection(ZeeFS, "ZeeFS");
+      // Zmm
+      LeadingParticlesFinalState ZmmFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      ZmmFS.addParticleIdPair(MUON);
+      addProjection(ZmmFS, "ZmmFS");
       
-      vector<pair<PdgId,PdgId> > vidsW;
-      vidsW.push_back(make_pair(ELECTRON, NU_EBAR));
-      vidsW.push_back(make_pair(POSITRON, NU_E));
-      vidsW.push_back(make_pair(MUON, NU_MUBAR));
-      vidsW.push_back(make_pair(ANTIMUON, NU_MU));
+      // We-nu_e~
+      LeadingParticlesFinalState WminusenuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      WminusenuFS.addParticleId(ELECTRON).addParticleId(NU_EBAR);
+      addProjection(WminusenuFS, "WminusenuFS");
       
-      FinalState fsW(-MAXRAPIDITY,MAXRAPIDITY);
-      InvMassFinalState invfsW(fsW, vidsW, 20*GeV, 99999*GeV);
-      addProjection(invfsW, "INVFSW");
+      // We+nu_e
+      LeadingParticlesFinalState WplusenuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      WplusenuFS.addParticleId(POSITRON).addParticleId(NU_E);
+      addProjection(WplusenuFS, "WplusenuFS");
+      
+      // Wm+nu_mu~
+      LeadingParticlesFinalState WplusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      WplusmunuFS.addParticleId(MUON).addParticleId(NU_MUBAR);
+      addProjection(WplusmunuFS, "WplusmunuFS");
+      
+      // Wm-nu_mu
+      LeadingParticlesFinalState WminusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      WminusmunuFS.addParticleId(ANTIMUON).addParticleId(NU_MU);
+      addProjection(WminusmunuFS, "WminusmunuFS");
       
       VetoedFinalState vfs(fs);
-      vfs.addVetoOnThisFinalState(invfsZ);
-      vfs.addVetoOnThisFinalState(invfsW);
+      vfs.vetoNeutrinos();
+      vfs.addVetoOnThisFinalState(ZeeFS);
+      vfs.addVetoOnThisFinalState(ZmmFS);
+      vfs.addVetoOnThisFinalState(WminusenuFS);
+      vfs.addVetoOnThisFinalState(WminusmunuFS);
+      vfs.addVetoOnThisFinalState(WplusenuFS);
+      vfs.addVetoOnThisFinalState(WplusmunuFS);
       addProjection(vfs, "VFS");
       addProjection(FastJets(vfs, FastJets::ANTIKT, 0.5), "Jets");
       
@@ -67,16 +84,16 @@ namespace Rivet {
       _histJetMultWmu    = bookHistogram1D("njetWmunu", 5, -0.5, 4.5);
       _histJetMultZelec  = bookHistogram1D("njetZee", 5, -0.5, 4.5);
       _histJetMultZmu    = bookHistogram1D("njetZmumu", 5, -0.5, 4.5);
-
+      
       _histJetMultWmuPlus = bookHistogram1D("njetWmuPlus", 5, -0.5, 4.5);
       _histJetMultWmuMinus = bookHistogram1D("njetWmuMinus", 5, -0.5, 4.5);
       _histJetMultWelPlus = bookHistogram1D("njetWePlus", 5, -0.5, 4.5);
       _histJetMultWelMinus = bookHistogram1D("njetWeMinus", 5, -0.5, 4.5);
-        _histJetMultRatioWmuPlusMinus = bookDataPointSet(10, 1, 1);
-	_histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
+      _histJetMultRatioWmuPlusMinus = bookDataPointSet(10, 1, 1);
+      _histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
 
     } 
-
+    
     
     bool ApplyElectronCutsForZee(double pt1, double pt2, double eta1, double eta2){
       bool isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
@@ -92,14 +109,14 @@ namespace Rivet {
       if( isFid1 && isFid2 && pt1>20 && pt2 >10) return true;
       else return false;
     }
-
+    
 
     bool ApplyElectronCutsForWen(double pt1, double eta1){
       bool isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
       if( isFid1 && pt1>20 ) return true;
       return 0;
     }
- 
+    
    
     bool ApplyMuonCutsForWmn(double pt1, double eta1){
       bool isFid1 = ((fabs(eta1)<2.1));
@@ -107,7 +124,7 @@ namespace Rivet {
       return 0;
     }
     
-
+    
     void Fill(AIDA::IHistogram1D*& _histJetMult, const double& weight, std::vector<FourMomentum>& finaljet_list){
       _histJetMult->fill(0, weight);
       for (size_t i=0 ; i<finaljet_list.size() ; ++i) {
@@ -121,10 +138,10 @@ namespace Rivet {
       for (int i=0; i<_histJetMult->axis().bins()-1; i++) {
         double val = 0.;
         double err = 0.;
-        if (!fuzzyEquals(_histJetMult->binHeight(i), 0)) {
+        if (!(fuzzyEquals(_histJetMult->binHeight(i), 0) || fuzzyEquals(_histJetMult->binHeight(i+1), 0))) {
           val = _histJetMult->binHeight(i+1) / _histJetMult->binHeight(i);
           err = val * sqrt(  pow(_histJetMult->binError(i+1)/_histJetMult->binHeight(i+1), 2)
-                           + pow(_histJetMult->binError(i)  /_histJetMult->binHeight(i)  , 2) );
+			     + pow(_histJetMult->binError(i)  /_histJetMult->binHeight(i)  , 2) );
         }
         y.push_back(val);
         yerr.push_back(err);
@@ -136,19 +153,19 @@ namespace Rivet {
       for (int i=0; i<_histJetMult->axis().bins()-1; i++) {
         double val = 0.;
         double err = 0.;
-        if (!fuzzyEquals(_histJetMult->binHeight(i), 0)) {
+        if (!(fuzzyEquals(_histJetMult->binHeight(0), 0) || fuzzyEquals(_histJetMult->binHeight(i+1), 0))) {
           val = _histJetMult->binHeight(i+1) / _histJetMult->binHeight(0);
           err = val * sqrt(  pow(_histJetMult->binError(i+1)/_histJetMult->binHeight(i+1), 2)
-                           + pow(_histJetMult->binError(0)  /_histJetMult->binHeight(0)  , 2) );
+			     + pow(_histJetMult->binError(0)  /_histJetMult->binHeight(0)  , 2) );
         }
         y.push_back(val);
         yerr.push_back(err);
       }
       _histNoverN0->setCoordinate(1, y, yerr);
     }    
-
     
-   void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
+    
+    void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
       std::vector<double> yval, yerr;
       for (int i = 0; i < 4; ++i) {
         std::vector<double> xval; xval.push_back(i);
@@ -161,25 +178,24 @@ namespace Rivet {
 	errNum = std::pow(_histJetMult1->binError(i),2)+std::pow(_histJetMult2->binError(i),2);
 	double errDen = 0;
 	errDen = std::pow(_histJetMult1->binError(i),2)+std::pow(_histJetMult2->binError(i),2); 
-
+	
         if (den)ratio = num/den;
-
+	
         if(num)
 	  errNum = errNum/(num*num); 
         if(den) 
 	  errDen = errDen/(den*den);
-
+	
         err = std::sqrt(errDen+errNum);
 	if(!(err==err))err=0;
         yval.push_back(ratio);
         yerr.push_back(ratio*err);
         }
-        _histJetMultRatio12->setCoordinate(1,yval,yerr);
-      }
+      _histJetMultRatio12->setCoordinate(1,yval,yerr);
+    }
     
-
-
-
+  
+   
     void analyze(const Event& event) {
       //some flag definitions.
       bool isZmm =false;
@@ -190,97 +206,158 @@ namespace Rivet {
       bool isWmnPlus  =false;
       bool isWenMinus =false;
       bool isWenPlus  =false;
-
+      
       const double weight = event.weight();
+      const LeadingParticlesFinalState& ZeeFS = applyProjection<LeadingParticlesFinalState>(event, "ZeeFS");
+      const LeadingParticlesFinalState& ZmmFS = applyProjection<LeadingParticlesFinalState>(event, "ZmmFS");
+      const LeadingParticlesFinalState& WminusenuFS = applyProjection<LeadingParticlesFinalState>(event, "WminusenuFS");
+      const LeadingParticlesFinalState& WplusenuFS = applyProjection<LeadingParticlesFinalState>(event, "WplusenuFS");
+      const LeadingParticlesFinalState& WminusmunuFS = applyProjection<LeadingParticlesFinalState>(event, "WminusmunuFS");
+      const LeadingParticlesFinalState& WplusmunuFS = applyProjection<LeadingParticlesFinalState>(event, "WplusmunuFS");
       
-      const InvMassFinalState& invMassFinalStateZ = applyProjection<InvMassFinalState>(event, "INVFSZ");
-      const InvMassFinalState& invMassFinalStateW = applyProjection<InvMassFinalState>(event, "INVFSW");
-      
-      bool isW(false); bool isZ(false);
-      
-      isW  = (invMassFinalStateZ.empty() && !(invMassFinalStateW.empty()));
-      isZ  = (!(invMassFinalStateZ.empty()) && invMassFinalStateW.empty());
-
-      const ParticleVector&  ZDecayProducts =  invMassFinalStateZ.particlesByPt();
-      const ParticleVector&  WDecayProducts =  invMassFinalStateW.particlesByPt();
-
-      if (ZDecayProducts.size() < 2 && WDecayProducts.size() <2) vetoEvent;
-      
-      double pt1=-9999.,  pt2=-9999.;
-      double phi1=-9999., phi2=-9999.;
-      double eta1=-9999., eta2=-9999.;
-
-      double mt = 999999;
-      if(isZ){
-	pt1  = ZDecayProducts[0].momentum().pT();
-	pt2  = ZDecayProducts[1].momentum().pT();
-	eta1 = ZDecayProducts[0].momentum().eta();
-	eta2 = ZDecayProducts[1].momentum().eta();
-	phi1 = ZDecayProducts[0].momentum().phi();
-	phi2 = ZDecayProducts[1].momentum().phi();
-      }
-      
-      if(isW){
-	if(
-	   (fabs(WDecayProducts[1].pdgId()) == NU_MU) || (fabs(WDecayProducts[1].pdgId()) == NU_E)){
-	  pt1  = WDecayProducts[0].momentum().pT();
-	  pt2  = WDecayProducts[1].momentum().Et();
-          eta1 = WDecayProducts[0].momentum().eta();
-          eta2 = WDecayProducts[1].momentum().eta();
-	  phi1 = WDecayProducts[0].momentum().phi();
-	  phi2 = WDecayProducts[1].momentum().phi();
-          mt=sqrt(2.0*pt1*pt2*(1.0-cos(phi1-phi2)));
+      bool boolZ= (ZeeFS.particles().size()>1 && ZmmFS.empty()) || (ZmmFS.particles().size()>1 && ZeeFS.empty()); 
+      bool boolW=(!WminusenuFS.empty() || !WplusenuFS.empty() || !WminusmunuFS.empty() || !WplusmunuFS.empty());
+      double phi1 = -9999., phi2 = -9999.;
+      double pt1 = -9999., pt2 = -9999.;
+      double eta1 = -9999., eta2 = -9999.;
+      if(boolZ){
+        cout<<"Z"<<endl;
+        if (ZeeFS.particles().size() == 2 && ZmmFS.empty()) {
+	  const ParticleVector& Zdaughters = ZeeFS.particlesByPt();
+	  if(ApplyElectronCutsForZee(Zdaughters[0].momentum().pT(),Zdaughters[1].momentum().pT(),
+				     Zdaughters[0].momentum().eta(),Zdaughters[1].momentum().eta())){
+	    const FourMomentum pmom = Zdaughters[0].momentum() + Zdaughters[1].momentum();
+	    double mass = sqrt(pmom.invariant());
+	    if (inRange(mass/GeV, 60.0, 120.0)) {
+	      isZee=true;
+	      eta1 = Zdaughters[0].momentum().eta();
+	      eta2 = Zdaughters[1].momentum().eta();
+	      phi1 = Zdaughters[0].momentum().phi();
+	      phi2 = Zdaughters[1].momentum().phi();
+	    } 
+	  }
 	}
-	else {
-	  pt1  = WDecayProducts[1].momentum().pT();
-	  pt2  = WDecayProducts[0].momentum().Et();
-          eta1 = WDecayProducts[1].momentum().eta();
-          eta2 = WDecayProducts[0].momentum().eta();
-	  phi1 = WDecayProducts[1].momentum().phi();
-	  phi2 = WDecayProducts[0].momentum().phi();
-          mt=sqrt(2.0*pt1*pt2*(1.0-cos(phi1-phi2)));
+	else if (ZmmFS.particles().size() == 2 && ZeeFS.empty()) {
+	  const ParticleVector& Zdaughters = ZmmFS.particlesByPt();
+	  if(ApplyMuonCutsForZmm(Zdaughters[0].momentum().pT(),Zdaughters[1].momentum().pT(),
+                                 Zdaughters[0].momentum().eta(),Zdaughters[1].momentum().eta())){
+	    const FourMomentum pmom = Zdaughters[0].momentum() + Zdaughters[1].momentum();
+	    double mass = sqrt(pmom.invariant());
+	    if (inRange(mass/GeV, 60.0, 120.0)) isZmm=true;
+	  }
 	}
       }
-
-      if(isW && mt<20)vetoEvent;
-            
-      isZmm = isZ && ((fabs(ZDecayProducts[0].pdgId()) == 13) && (fabs(ZDecayProducts[1].pdgId()) == 13));
-      isZee = isZ && ((fabs(ZDecayProducts[0].pdgId()) == 11) && (fabs(ZDecayProducts[1].pdgId()) == 11));
-      isWmn  = isW && ((fabs(WDecayProducts[0].pdgId()) == 14) || (fabs(WDecayProducts[1].pdgId()) == 14));
-      isWen  = isW && ((fabs(WDecayProducts[0].pdgId()) == 12) || (fabs(WDecayProducts[1].pdgId()) == 12));
+      else if(boolW)
+	{
+	  cout<<"W"<<endl;
+	  bool boolWenMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
+	  bool boolWenPlus=WminusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
+	  bool boolWmnMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusenuFS.empty() ;
+	  bool boolWmnPlus=WplusenuFS.empty() && WminusenuFS.empty() && WminusmunuFS.empty() ;
+	  bool boolWen=WplusmunuFS.empty() && WminusmunuFS.empty() ;
+	  bool boolWmn=WplusenuFS.empty() && WminusenuFS.empty() ;
+	  
+	  if (WminusenuFS.particles().size() == 2 && boolWenMinus ) {
+	    const ParticleVector& Wdaughters = WminusenuFS.particles();
+	    //	    for(unsigned int i=0;i<=WminusenuFS.particles().size();++i){cout<<"boolWenMinus "<<Wdaughters[i].pdgId()<<endl;}
+	    if(ApplyElectronCutsForWen(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
+	      double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
+	      if (mt>20){
+		isWenMinus=true;
+		eta1 = Wdaughters[1].momentum().eta();
+		eta2 = Wdaughters[0].momentum().eta();
+		phi1 = Wdaughters[1].momentum().phi();
+		phi2 = Wdaughters[0].momentum().phi();
+	      }
+	    }
+	  }
+	  else if (WplusenuFS.particles().size() == 2 && boolWenPlus) {
+	    const ParticleVector& Wdaughters = WplusenuFS.particles();
+	    //	    for(unsigned int i=0;i<=WplusenuFS.particles().size();++i){cout<<"boolWenPlus "<<Wdaughters[i].pdgId()<<endl;}
+	    if(ApplyElectronCutsForWen(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
+	      double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
+	      if (mt>20) {
+			isWenPlus=true;
+                        eta1 = Wdaughters[0].momentum().eta();
+                        eta2 = Wdaughters[1].momentum().eta();
+                        phi1 = Wdaughters[0].momentum().phi();
+                        phi2 = Wdaughters[1].momentum().phi();
+	      }	
+	    }
+	  }
+	  else if (WminusmunuFS.particles().size() == 2 && boolWmnMinus) {
+	    const ParticleVector& Wdaughters = WminusmunuFS.particles();
+	    //	    for(unsigned int i=0;i<=WminusmunuFS.particles().size();++i){cout<<"boolWmnMinus "<<Wdaughters[i].pdgId()<<endl;}
+	    if(ApplyMuonCutsForWmn(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
+	      double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
+	      if (mt>20) isWmnMinus=true;
+	    }
+	  }
+	  else if (WplusmunuFS.particles().size() == 2 && boolWmnPlus) {
+	    const ParticleVector& Wdaughters = WplusmunuFS.particles();
+	    //	    for(unsigned int i=0;i<=WplusmunuFS.particles().size();++i){cout<<"boolWmnPlus "<<Wdaughters[i].pdgId()<<endl;}
+	    if(ApplyMuonCutsForWmn(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
+	      double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
+	      if (mt>20) isWmnPlus=true;
+	    }
+	  }
+	  if(boolWen){
+	    ParticleVector Wdaughters;
+	    if (WminusenuFS.particles().size() == 2 && WplusenuFS.empty()) {
+	      Wdaughters = WminusenuFS.particles();}
+	    else if (WplusenuFS.particles().size() == 2 && WminusenuFS.empty()) {
+	      Wdaughters = WplusenuFS.particles();
+	    }
+	    if((fabs(Wdaughters[1].pdgId()) == NU_E)){
+	      if(ApplyElectronCutsForWen(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
+		double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
+		if (mt>20) {
+		  isWen=true;
+		  eta1 = Wdaughters[0].momentum().eta();
+		  eta2 = Wdaughters[1].momentum().eta();
+		  phi1 = Wdaughters[0].momentum().phi();
+		  phi2 = Wdaughters[1].momentum().phi();
+		}
+	      }
+	    }
+	    else {
+	      if(ApplyElectronCutsForWen(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
+		double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
+		if (mt>20) {
+		  isWen=true;
+		  eta1 = Wdaughters[1].momentum().eta();
+		  eta2 = Wdaughters[0].momentum().eta();
+		  phi1 = Wdaughters[1].momentum().phi();
+		  phi2 = Wdaughters[0].momentum().phi();
+		}
+	      }
+	    }
+	  }
+	  else if(boolWmn){ 
+	    ParticleVector Wmdaughters;
+	    if (WminusmunuFS.particles().size() == 2 && WplusmunuFS.empty()) {
+	      Wmdaughters = WminusmunuFS.particlesByPt();}
+	    else if (WplusmunuFS.particles().size() == 2 && WminusmunuFS.empty()) {
+	      Wmdaughters = WplusmunuFS.particlesByPt();
+	    }
+	    if((fabs(Wmdaughters[1].pdgId()) == NU_MU)){
+	      if(ApplyMuonCutsForWmn(Wmdaughters[0].momentum().pT(),Wmdaughters[0].momentum().eta())){
+		double mt=sqrt(2.0*Wmdaughters[0].momentum().pT()*Wmdaughters[1].momentum().Et()*(1.0-cos(Wmdaughters[0].momentum().phi()-Wmdaughters[1].momentum().phi())));
+		if (mt>20) isWmn=true;
+	      }
+	      else {
+		if(ApplyMuonCutsForWmn(Wmdaughters[1].momentum().pT(),Wmdaughters[1].momentum().eta())){
+		  double mt=sqrt(2.0*Wmdaughters[1].momentum().pT()*Wmdaughters[0].momentum().Et()*(1.0-cos(Wmdaughters[1].momentum().phi()-Wmdaughters[0].momentum().phi())));
+		  if (mt>20) isWmn=true;
+		}
+	      }
+	    }
+	  }          
+	}
+    
+      if(!(isZmm||isZee||isWmn||isWen||isWmnPlus || isWenPlus||isWenMinus||isWmnMinus))vetoEvent;
       
-      if(isWmn){
-        if((WDecayProducts[0].pdgId()==-13)|| (WDecayProducts[1].pdgId()==-13)){
-	isWmnMinus = false;
-	isWmnPlus = true;
-	  }	
-       else{
-	isWmnMinus = true;
-	isWmnPlus  = false;
-      } 
-     }
-
-      if(isWen){
-       if((WDecayProducts[0].pdgId()==11)|| (WDecayProducts[1].pdgId()==11)){
-	isWenMinus = true;
-	isWenPlus = false;
-      }
-      else{
-	isWenMinus = false;
-	isWenPlus  = true;
-       }
-      }
-
-      if(!((isZmm||isZee)||(isWmn||isWen)))vetoEvent;
-              
-      bool passBosonConditions = false;
-      if(isZmm)passBosonConditions = ApplyMuonCutsForZmm(pt1,pt2,eta1,eta2);
-      if(isZee)passBosonConditions = ApplyElectronCutsForZee(pt1,pt2,eta1,eta2);
-      if(isWen)passBosonConditions = ApplyElectronCutsForWen(pt1,eta1);  
-      if(isWmn)passBosonConditions = ApplyMuonCutsForWmn(pt1,eta1);  
       
-      if(!passBosonConditions)vetoEvent;
-          
       //Obtain the jets.
       vector<FourMomentum> finaljet_list;
       foreach (const Jet& j, applyProjection<FastJets>(event, "Jets").jetsByPt(30.0*GeV)) {
@@ -289,21 +366,21 @@ namespace Rivet {
 	const double jpt = j.momentum().pT();
 	if (fabs(jeta) < 2.4) 
 	  if(jpt>30){
-	      if(isZee){
-		  if (deltaR(pt1, phi1, jeta, jphi) > 0.3 && deltaR(pt2, phi2, jeta, jphi) > 0.3)
-		    finaljet_list.push_back(j.momentum());
-		  continue;
-		}
-	      else if(isWen){
-		  if (deltaR(pt1, phi1, jeta, jphi) > 0.3)
-		    finaljet_list.push_back(j.momentum());
-		  continue;
-	      }
-	      
-	      else  finaljet_list.push_back(j.momentum());
+	    if(isZee){
+	      if (deltaR(eta1, phi1, jeta, jphi) > 0.3 && deltaR(eta2, phi2, jeta, jphi) > 0.3)
+		finaljet_list.push_back(j.momentum());
+	      continue;
+	    }
+	    else if(isWen || isWenPlus||isWenMinus ){
+	      if (deltaR(eta1, phi1, jeta, jphi) > 0.3)
+		finaljet_list.push_back(j.momentum());
+	      continue;
+	    }
+	    
+	    else  finaljet_list.push_back(j.momentum());
 	  }
       }
-
+      
       //Multiplicity plots.	
       if(isWen)Fill(_histJetMultWelec, weight, finaljet_list);
       if(isWmn)Fill(_histJetMultWmu, weight, finaljet_list);
@@ -331,7 +408,7 @@ namespace Rivet {
     }
 
   private:
-
+    
     AIDA::IHistogram1D*  _histJetMultWelec;
     AIDA::IDataPointSet* _histNoverNm1Welec;          // n/(n-1)
     AIDA::IDataPointSet* _histNoverN0Welec;          // n/n(0)
