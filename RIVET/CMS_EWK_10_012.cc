@@ -93,23 +93,73 @@ namespace Rivet {
       _histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
 
     } 
-    
-    
-    bool ApplyElectronCutsForZee(double pt1, double pt2, double eta1, double eta2){
-      bool isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
-      bool isFid2 = ((fabs(eta2)<1.4442)||((fabs(eta2)>1.566)&&(fabs(eta2)<2.5)));
-      if( isFid1 && isFid2 && pt1>20 && pt2 >10) return true;
-      else return false;
-    }
+      void GetPtEtaPhi(Particle p1, double& pt, double& eta,double& phi){
+	pt = p1.momentum().pT();
+	eta = p1.momentum().eta();
+        phi = p1.momentum().phi();
+	return;
+      }
 
     
-    bool ApplyMuonCutsForZmm(double pt1, double pt2, double eta1, double eta2){
-      bool isFid1 = ((fabs(eta1)<2.1));
-      bool isFid2 = ((fabs(eta2)<2.4));
-      if( isFid1 && isFid2 && pt1>20 && pt2 >10) return true;
-      else return false;
-    }
-    
+      bool ApplyZAcceptance(const LeadingParticlesFinalState& zFS, std::string lepton){
+	const ParticleVector& Zdaughters = zFS.particlesByPt();
+	double phi1 = -9999., phi2 = -9999.;
+	double pt1 = -9999., pt2 = -9999.;
+	double eta1 = -9999., eta2 = -9999.;
+	GetPtEtaPhi(Zdaughters[0],pt1,eta1,phi1);
+	GetPtEtaPhi(Zdaughters[1],pt2,eta2,phi2);
+	bool isFid1 = false;
+	bool isFid2 = false;
+	if(lepton=="electron"){
+	isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
+	isFid2 = ((fabs(eta2)<1.4442)||((fabs(eta2)>1.566)&&(fabs(eta2)<2.5)));
+	}
+	if(lepton=="muon"){
+	  isFid1 = ((fabs(eta1)<2.1));
+	  isFid2 = ((fabs(eta2)<2.4));
+  	}
+
+	if( isFid1 && isFid2 && pt1>20 && pt2 >10){
+	  const FourMomentum pmom = Zdaughters[0].momentum() + Zdaughters[1].momentum();
+	  double mass = sqrt(pmom.invariant());
+	  if (inRange(mass/GeV, 60.0, 120.0))
+	    return true;
+	  else return false;
+	}
+	else return false;
+      }
+      
+      bool ApplyWAcceptance(const LeadingParticlesFinalState& wFS,std::string lepton){
+        const ParticleVector& Wdaughters = wFS.particles();
+        double phi1 = -9999.;
+        double pt1 = -9999.;
+        double eta1 = -9999.;
+
+	Particle lep;
+	Particle neut;
+	int lepIndex = GetLeptonIndex(wFS);
+	lep = Wdaughters[lepIndex];
+	if(lepIndex==0) neut = Wdaughters[lepIndex+1];
+	else if(lepIndex==1) neut = Wdaughters[lepIndex-1];
+        GetPtEtaPhi(Wdaughters[lepIndex],pt1,eta1,phi1);
+        bool isFid = false;
+        if(lepton=="electron")isFid = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
+        if(lepton=="muon") isFid = ((fabs(eta1)<2.1));
+        if(!isFid)return false;
+	double mt=sqrt(2.0*lep.momentum().pT()*neut.momentum().Et()*(1.0-cos(lep.momentum().phi()-neut.momentum().phi())));
+	if (mt<20)return false;
+	return true;
+      }
+      const int GetLeptonIndex(const LeadingParticlesFinalState& wFS){
+	const ParticleVector& Wdaughters = wFS.particles();
+	double pdgId1 = fabs(Wdaughters[0].pdgId());
+	double pdgId2 = fabs(Wdaughters[1].pdgId());
+	bool order1 = ((pdgId1==11&&pdgId2==12)||(pdgId1==13&&pdgId2==14));
+	bool order2 = ((pdgId1==12&&pdgId2==11)||(pdgId1==14&&pdgId2==13));
+	if(order1 && !order2) return 0;
+	else if(order2 && !order1)return 1;
+	else return -99999;
+      }
 
     bool ApplyElectronCutsForWen(double pt1, double eta1){
       bool isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
@@ -200,12 +250,12 @@ namespace Rivet {
       //some flag definitions.
       bool isZmm =false;
       bool isZee =false;
-      bool isWmn =false;
-      bool isWen =false;
       bool isWmnMinus =false;
       bool isWmnPlus  =false;
       bool isWenMinus =false;
       bool isWenPlus  =false;
+      bool isWmn =false;
+      bool isWen =false;
       
       const double weight = event.weight();
       const LeadingParticlesFinalState& ZeeFS = applyProjection<LeadingParticlesFinalState>(event, "ZeeFS");
@@ -220,142 +270,63 @@ namespace Rivet {
       double phi1 = -9999., phi2 = -9999.;
       double pt1 = -9999., pt2 = -9999.;
       double eta1 = -9999., eta2 = -9999.;
-      if(boolZ){
-        cout<<"Z"<<endl;
-        if (ZeeFS.particles().size() == 2 && ZmmFS.empty()) {
-	  const ParticleVector& Zdaughters = ZeeFS.particlesByPt();
-	  if(ApplyElectronCutsForZee(Zdaughters[0].momentum().pT(),Zdaughters[1].momentum().pT(),
-				     Zdaughters[0].momentum().eta(),Zdaughters[1].momentum().eta())){
-	    const FourMomentum pmom = Zdaughters[0].momentum() + Zdaughters[1].momentum();
-	    double mass = sqrt(pmom.invariant());
-	    if (inRange(mass/GeV, 60.0, 120.0)) {
-	      isZee=true;
-	      eta1 = Zdaughters[0].momentum().eta();
-	      eta2 = Zdaughters[1].momentum().eta();
-	      phi1 = Zdaughters[0].momentum().phi();
-	      phi2 = Zdaughters[1].momentum().phi();
-	    } 
-	  }
-	}
-	else if (ZmmFS.particles().size() == 2 && ZeeFS.empty()) {
-	  const ParticleVector& Zdaughters = ZmmFS.particlesByPt();
-	  if(ApplyMuonCutsForZmm(Zdaughters[0].momentum().pT(),Zdaughters[1].momentum().pT(),
-                                 Zdaughters[0].momentum().eta(),Zdaughters[1].momentum().eta())){
-	    const FourMomentum pmom = Zdaughters[0].momentum() + Zdaughters[1].momentum();
-	    double mass = sqrt(pmom.invariant());
-	    if (inRange(mass/GeV, 60.0, 120.0)) isZmm=true;
-	  }
-	}
+
+  const ParticleVector& ZeeDaus  = ZeeFS.particlesByPt();
+  const ParticleVector& ZmmDaus = ZmmFS.particlesByPt();
+
+  if(boolZ){
+        //cout<<"Z"<<endl;
+    if(ZeeDaus.size()==2 && ZmmDaus.size()<2){
+      isZee = ApplyZAcceptance(ZeeFS,"electron");
+	GetPtEtaPhi(ZeeDaus[0],pt1,eta1,phi1);
+	GetPtEtaPhi(ZeeDaus[1],pt2,eta2,phi2);
+    }
+    if(ZmmDaus.size()==2 && ZeeDaus.size()<2){
+      isZmm = ApplyZAcceptance(ZmmFS,"muon");
+    }
+  }
+  else if(boolW)
+    {
+      //cout<<"W"<<endl;
+      bool boolWenMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
+      bool boolWenPlus=WminusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
+      bool boolWmnMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusenuFS.empty() ;
+      bool boolWmnPlus=WplusenuFS.empty() && WminusenuFS.empty() && WminusmunuFS.empty() ;
+      
+      if (WminusenuFS.particles().size() == 2 && boolWenMinus ){
+	isWenMinus = ApplyWAcceptance(WminusenuFS,"electron");
+	int lep = GetLeptonIndex(WminusenuFS);
+	const ParticleVector& Wdaughters = WminusenuFS.particles();
+        GetPtEtaPhi(Wdaughters[lep],pt1,eta1,phi1);
       }
-      else if(boolW)
-	{
-	  cout<<"W"<<endl;
-	  bool boolWenMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
-	  bool boolWenPlus=WminusenuFS.empty() && WplusmunuFS.empty() && WminusmunuFS.empty() ;
-	  bool boolWmnMinus=WplusenuFS.empty() && WplusmunuFS.empty() && WminusenuFS.empty() ;
-	  bool boolWmnPlus=WplusenuFS.empty() && WminusenuFS.empty() && WminusmunuFS.empty() ;
-	  bool boolWen=WplusmunuFS.empty() && WminusmunuFS.empty() ;
-	  bool boolWmn=WplusenuFS.empty() && WminusenuFS.empty() ;
-	  
-	  if (WminusenuFS.particles().size() == 2 && boolWenMinus ) {
-	    const ParticleVector& Wdaughters = WminusenuFS.particles();
-	    //	    for(unsigned int i=0;i<=WminusenuFS.particles().size();++i){cout<<"boolWenMinus "<<Wdaughters[i].pdgId()<<endl;}
-	    if(ApplyElectronCutsForWen(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
-	      double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
-	      if (mt>20){
-		isWenMinus=true;
-		eta1 = Wdaughters[1].momentum().eta();
-		eta2 = Wdaughters[0].momentum().eta();
-		phi1 = Wdaughters[1].momentum().phi();
-		phi2 = Wdaughters[0].momentum().phi();
-	      }
-	    }
-	  }
-	  else if (WplusenuFS.particles().size() == 2 && boolWenPlus) {
-	    const ParticleVector& Wdaughters = WplusenuFS.particles();
-	    //	    for(unsigned int i=0;i<=WplusenuFS.particles().size();++i){cout<<"boolWenPlus "<<Wdaughters[i].pdgId()<<endl;}
-	    if(ApplyElectronCutsForWen(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
-	      double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
-	      if (mt>20) {
-			isWenPlus=true;
-                        eta1 = Wdaughters[0].momentum().eta();
-                        eta2 = Wdaughters[1].momentum().eta();
-                        phi1 = Wdaughters[0].momentum().phi();
-                        phi2 = Wdaughters[1].momentum().phi();
-	      }	
-	    }
-	  }
-	  else if (WminusmunuFS.particles().size() == 2 && boolWmnMinus) {
-	    const ParticleVector& Wdaughters = WminusmunuFS.particles();
-	    //	    for(unsigned int i=0;i<=WminusmunuFS.particles().size();++i){cout<<"boolWmnMinus "<<Wdaughters[i].pdgId()<<endl;}
-	    if(ApplyMuonCutsForWmn(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
-	      double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
-	      if (mt>20) isWmnMinus=true;
-	    }
-	  }
-	  else if (WplusmunuFS.particles().size() == 2 && boolWmnPlus) {
-	    const ParticleVector& Wdaughters = WplusmunuFS.particles();
-	    //	    for(unsigned int i=0;i<=WplusmunuFS.particles().size();++i){cout<<"boolWmnPlus "<<Wdaughters[i].pdgId()<<endl;}
-	    if(ApplyMuonCutsForWmn(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
-	      double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
-	      if (mt>20) isWmnPlus=true;
-	    }
-	  }
-	  if(boolWen){
-	    ParticleVector Wdaughters;
-	    if (WminusenuFS.particles().size() == 2 && WplusenuFS.empty()) {
-	      Wdaughters = WminusenuFS.particles();}
-	    else if (WplusenuFS.particles().size() == 2 && WminusenuFS.empty()) {
-	      Wdaughters = WplusenuFS.particles();
-	    }
-	    if((fabs(Wdaughters[1].pdgId()) == NU_E)){
-	      if(ApplyElectronCutsForWen(Wdaughters[0].momentum().pT(),Wdaughters[0].momentum().eta())){
-		double mt=sqrt(2.0*Wdaughters[0].momentum().pT()*Wdaughters[1].momentum().Et()*(1.0-cos(Wdaughters[0].momentum().phi()-Wdaughters[1].momentum().phi())));
-		if (mt>20) {
-		  isWen=true;
-		  eta1 = Wdaughters[0].momentum().eta();
-		  eta2 = Wdaughters[1].momentum().eta();
-		  phi1 = Wdaughters[0].momentum().phi();
-		  phi2 = Wdaughters[1].momentum().phi();
-		}
-	      }
-	    }
-	    else {
-	      if(ApplyElectronCutsForWen(Wdaughters[1].momentum().pT(),Wdaughters[1].momentum().eta())){
-		double mt=sqrt(2.0*Wdaughters[1].momentum().pT()*Wdaughters[0].momentum().Et()*(1.0-cos(Wdaughters[1].momentum().phi()-Wdaughters[0].momentum().phi())));
-		if (mt>20) {
-		  isWen=true;
-		  eta1 = Wdaughters[1].momentum().eta();
-		  eta2 = Wdaughters[0].momentum().eta();
-		  phi1 = Wdaughters[1].momentum().phi();
-		  phi2 = Wdaughters[0].momentum().phi();
-		}
-	      }
-	    }
-	  }
-	  else if(boolWmn){ 
-	    ParticleVector Wmdaughters;
-	    if (WminusmunuFS.particles().size() == 2 && WplusmunuFS.empty()) {
-	      Wmdaughters = WminusmunuFS.particlesByPt();}
-	    else if (WplusmunuFS.particles().size() == 2 && WminusmunuFS.empty()) {
-	      Wmdaughters = WplusmunuFS.particlesByPt();
-	    }
-	    if((fabs(Wmdaughters[1].pdgId()) == NU_MU)){
-	      if(ApplyMuonCutsForWmn(Wmdaughters[0].momentum().pT(),Wmdaughters[0].momentum().eta())){
-		double mt=sqrt(2.0*Wmdaughters[0].momentum().pT()*Wmdaughters[1].momentum().Et()*(1.0-cos(Wmdaughters[0].momentum().phi()-Wmdaughters[1].momentum().phi())));
-		if (mt>20) isWmn=true;
-	      }
-	      else {
-		if(ApplyMuonCutsForWmn(Wmdaughters[1].momentum().pT(),Wmdaughters[1].momentum().eta())){
-		  double mt=sqrt(2.0*Wmdaughters[1].momentum().pT()*Wmdaughters[0].momentum().Et()*(1.0-cos(Wmdaughters[1].momentum().phi()-Wmdaughters[0].momentum().phi())));
-		  if (mt>20) isWmn=true;
-		}
-	      }
-	    }
-	  }          
-	}
-    
-      if(!(isZmm||isZee||isWmn||isWen||isWmnPlus || isWenPlus||isWenMinus||isWmnMinus))vetoEvent;
+      
+      else if (WplusenuFS.particles().size() == 2 && boolWenPlus) {
+	isWenPlus=ApplyWAcceptance(WplusenuFS,"electron");   
+	int lep = GetLeptonIndex(WplusenuFS);
+	const ParticleVector& Wdaughters = WplusenuFS.particles();
+        GetPtEtaPhi(Wdaughters[lep],pt1,eta1,phi1);
+      }
+      
+      else if (WminusmunuFS.particles().size() == 2 && boolWmnMinus) {
+	isWmnMinus=ApplyWAcceptance(WminusmunuFS,"muon");
+	int lep = GetLeptonIndex(WminusmunuFS);
+	const ParticleVector& Wdaughters = WminusmunuFS.particles();
+	GetPtEtaPhi(Wdaughters[lep],pt1,eta1,phi1);
+      }
+      
+      else if (WplusmunuFS.particles().size() == 2 && boolWmnPlus) {
+	isWmnPlus=ApplyWAcceptance(WplusmunuFS,"muon");
+	int lep = GetLeptonIndex(WplusmunuFS);
+	const ParticleVector& Wdaughters = WplusmunuFS.particles();
+	GetPtEtaPhi(Wdaughters[lep],pt1,eta1,phi1);
+      }
+      
+      if(isWenMinus||isWenPlus)isWen = true;
+      if(isWmnMinus||isWmnPlus)isWmn = true;
+      
+    }
+     
+      if(!(isZmm||isZee||isWmnPlus || isWenPlus||isWenMinus||isWmnMinus))vetoEvent;
       
       
       //Obtain the jets.
@@ -371,7 +342,7 @@ namespace Rivet {
 		finaljet_list.push_back(j.momentum());
 	      continue;
 	    }
-	    else if(isWen || isWenPlus||isWenMinus ){
+	    else if( isWenPlus||isWenMinus ){
 	      if (deltaR(eta1, phi1, jeta, jphi) > 0.3)
 		finaljet_list.push_back(j.momentum());
 	      continue;
@@ -382,16 +353,18 @@ namespace Rivet {
       }
       
       //Multiplicity plots.	
-      if(isWen)Fill(_histJetMultWelec, weight, finaljet_list);
-      if(isWmn)Fill(_histJetMultWmu, weight, finaljet_list);
+      //      if(isWen)Fill(_histJetMultWelec, weight, finaljet_list);
+      if(isWenPlus || isWenMinus)Fill(_histJetMultWelec, weight, finaljet_list);
+      //      if(isWmn)Fill(_histJetMultWmu, weight, finaljet_list);
+      if(isWmnPlus || isWmnMinus)Fill(_histJetMultWmu, weight, finaljet_list);
       if(isWmnPlus)Fill(_histJetMultWmuPlus, weight, finaljet_list);
       if(isWmnMinus)Fill(_histJetMultWmuMinus, weight, finaljet_list);
       if(isWenPlus)Fill(_histJetMultWelPlus, weight, finaljet_list);
       if(isWenMinus)Fill(_histJetMultWelMinus, weight, finaljet_list);
       if(isZee)Fill(_histJetMultZelec, weight, finaljet_list);
       if(isZmm)Fill(_histJetMultZmu, weight, finaljet_list);
-    }
-    
+      
+    }   
     
     /// Normalise histograms etc., after the run
     void finalize() {
@@ -436,5 +409,6 @@ namespace Rivet {
   
   AnalysisBuilder<CMS_EWK_10_012> plugin_CMS_EWK_10_012;
   
+ 
 }
 
