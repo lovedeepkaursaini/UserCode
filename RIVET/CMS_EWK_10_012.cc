@@ -53,12 +53,12 @@ namespace Rivet {
       
       // Wm+nu_mu~
       LeadingParticlesFinalState WplusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
-      WplusmunuFS.addParticleId(MUON).addParticleId(NU_MUBAR);
+      WplusmunuFS.addParticleId(ANTIMUON).addParticleId(NU_MU);
       addProjection(WplusmunuFS, "WplusmunuFS");
       
       // Wm-nu_mu
       LeadingParticlesFinalState WminusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
-      WminusmunuFS.addParticleId(ANTIMUON).addParticleId(NU_MU);
+      WminusmunuFS.addParticleId(MUON).addParticleId(NU_MUBAR);
       addProjection(WminusmunuFS, "WminusmunuFS");
       
       VetoedFinalState vfs(fs);
@@ -161,19 +161,6 @@ namespace Rivet {
 	else return -99999;
       }
 
-    bool ApplyElectronCutsForWen(double pt1, double eta1){
-      bool isFid1 = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
-      if( isFid1 && pt1>20 ) return true;
-      return 0;
-    }
-    
-   
-    bool ApplyMuonCutsForWmn(double pt1, double eta1){
-      bool isFid1 = ((fabs(eta1)<2.1));
-      if( isFid1 && pt1>20) return true;
-      return 0;
-    }
-    
     
     void Fill(AIDA::IHistogram1D*& _histJetMult, const double& weight, std::vector<FourMomentum>& finaljet_list){
       _histJetMult->fill(0, weight);
