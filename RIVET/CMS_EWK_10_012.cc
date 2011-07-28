@@ -146,8 +146,8 @@ namespace Rivet {
         if(lepton=="electron")isFid = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
         if(lepton=="muon") isFid = ((fabs(eta1)<2.1));
         if(!isFid)return false;
-	double mt=sqrt(2.0*lep.momentum().pT()*neut.momentum().Et()*(1.0-cos(lep.momentum().phi()-neut.momentum().phi())));
-	if (mt<20)return false;
+/*	double mt=sqrt(2.0*lep.momentum().pT()*neut.momentum().Et()*(1.0-cos(lep.momentum().phi()-neut.momentum().phi())));
+	if (mt<20)return false;*/
 	return true;
       }
       const int GetLeptonIndex(const LeadingParticlesFinalState& wFS){
