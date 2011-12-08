@@ -91,6 +91,10 @@ namespace Rivet {
       _histJetMultWelMinus = bookHistogram1D("njetWeMinus", 5, -0.5, 4.5);
       _histJetMultRatioWmuPlusMinus = bookDataPointSet(10, 1, 1);
       _histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
+      _histWZRatioelec = bookDataPointSet(11, 1, 1);
+      _histWZRatiomu = bookDataPointSet(12, 1, 1);
+      _histWZnormRatioelec = bookDataPointSet(13, 1, 1);
+      _histWZnormRatiomu = bookDataPointSet(14, 1, 1);
 
     } 
       void GetPtEtaPhi(Particle p1, double& pt, double& eta,double& phi){
@@ -201,7 +205,87 @@ namespace Rivet {
       _histNoverN0->setCoordinate(1, y, yerr);
     }    
     
-    
+
+    void FillWZRatioHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12){ 
+       for (int i = 0; i < 4; ++i) {
+        std::vector<double> xval; xval.push_back(i);
+        std::vector<double> xerr; xerr.push_back(.5);
+        double ratioWZ = 0;
+        double errWZ = 0.;
+        if (_histJetMult2->binHeight(i) > 0.)
+          ratioWZ = _histJetMult1->binHeight(i)/_histJetMult2->binHeight(i);
+       double errZ = 0;
+        if(_histJetMult2->binHeight(i) > 0.){
+          double delMult = _histJetMult2->binError(i);
+          double mult = _histJetMult2->binHeight(i);
+          errZ = delMult/mult;
+        }
+        double errW = 0;
+        if(_histJetMult1->binHeight(i) > 0.){
+          double delMult = _histJetMult1->binError(i);
+          double mult = _histJetMult1->binHeight(i);
+          errW = delMult/mult;
+        }
+        errWZ = std::sqrt(std::pow(errW,2)+std::pow(errZ,2));
+        std::vector<double> yval;yval.push_back(ratioWZ);
+        std::vector<double> yerr;yerr.push_back(ratioWZ*errWZ);
+        _histJetMultRatio12->setCoordinate(0,xval,xerr);
+        _histJetMultRatio12->setCoordinate(1,yval,yerr);
+	}
+      }
+
+
+    void FillWZnormRatioHistogramSet( AIDA::IHistogram1D* _histJetMult1,AIDA::IHistogram1D* _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
+      std::vector<double> Wyval, Wyerr;
+      for (int i=0; i<_histJetMult1->axis().bins()-1; i++) {
+        double val = 0.;
+        double err = 0.;
+        if (!(fuzzyEquals(_histJetMult1->binHeight(0), 0) || fuzzyEquals(_histJetMult1->binHeight(i+1), 0))) {
+          val = _histJetMult1->binHeight(i+1) / _histJetMult1->binHeight(0);
+          err = val * sqrt(  pow(_histJetMult1->binError(i+1)/_histJetMult1->binHeight(i+1), 2)
+                             + pow(_histJetMult1->binError(0)  /_histJetMult1->binHeight(0)  , 2) );
+        }
+        Wyval.push_back(val);
+        Wyerr.push_back(err);
+      }
+     std::vector<double> Zyval, Zyerr;
+      for (int i=0; i<_histJetMult2->axis().bins()-1; i++) {
+        double val = 0.;
+        double err = 0.;
+        if (!(fuzzyEquals(_histJetMult2->binHeight(0), 0) || fuzzyEquals(_histJetMult2->binHeight(i+1), 0))) {
+          val = _histJetMult2->binHeight(i+1) / _histJetMult2->binHeight(0);
+          err = val * sqrt(  pow(_histJetMult2->binError(i+1)/_histJetMult2->binHeight(i+1), 2)
+                             + pow(_histJetMult2->binError(0)  /_histJetMult2->binHeight(0)  , 2) );
+        }
+        Zyval.push_back(val);
+        Zyerr.push_back(err);
+      }
+
+       for (int i = 0; i < 4; ++i) {
+        std::vector<double> xval; xval.push_back(i);
+        std::vector<double> xerr; xerr.push_back(.5);
+        double ratioWZ = 0;
+        double errWZ = 0.;
+        if (Zyval[i] > 0.)
+          ratioWZ = Wyval[i]/Zyval[i];
+       double errZ = 0;
+        if(Zyval[i] > 0.)
+          errZ = Zyerr[i]/Zyval[i];
+        double errW = 0;
+        if(Wyval[i] > 0.)
+          errW = Wyerr[i]/Wyval[i];
+        
+        errWZ = std::sqrt(std::pow(errW,2)+std::pow(errZ,2));
+        std::vector<double> yval;yval.push_back(ratioWZ);
+        std::vector<double> yerr;yerr.push_back(ratioWZ*errWZ);
+        _histJetMultRatio12->setCoordinate(0,xval,xerr);
+        _histJetMultRatio12->setCoordinate(1,yval,yerr);
+        }
+
+      }
+
+
+ 
     void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
       std::vector<double> yval, yerr;
       for (int i = 0; i < 4; ++i) {
@@ -219,9 +303,9 @@ namespace Rivet {
         if (den)ratio = num/den;
 	
         if(num)
-	  errNum = errNum/(num*num); 
+	  errNum = errNum*errNum/(num*num); 
         if(den) 
-	  errDen = errDen/(den*den);
+	  errDen = errDen*errDen/(den*den);
 	
         err = std::sqrt(errDen+errNum);
 	if(!(err==err))err=0;
@@ -365,6 +449,10 @@ namespace Rivet {
       FillNoverN0(_histJetMultZmu,_histNoverN0Zmu);
       FillChargeAssymHistogramSet(_histJetMultWmuPlus,_histJetMultWmuMinus, _histJetMultRatioWmuPlusMinus);
       FillChargeAssymHistogramSet(_histJetMultWelPlus,_histJetMultWelMinus, _histJetMultRatioWelPlusMinus);
+      FillWZRatioHistogramSet(_histJetMultWelec, _histJetMultZelec,_histWZRatioelec);
+      FillWZRatioHistogramSet(_histJetMultWmu, _histJetMultZmu,_histWZRatiomu);
+      FillWZnormRatioHistogramSet(_histJetMultWelec, _histJetMultZelec,_histWZnormRatioelec);
+      FillWZnormRatioHistogramSet(_histJetMultWmu, _histJetMultZmu,_histWZnormRatiomu);
     }
 
   private:
@@ -392,6 +480,12 @@ namespace Rivet {
     AIDA::IHistogram1D*  _histJetMultZmu;
     AIDA::IDataPointSet* _histNoverNm1Zmu;          // n/(n-1)
     AIDA::IDataPointSet* _histNoverN0Zmu;          // n/n(0)
+
+    AIDA::IDataPointSet* _histWZRatioelec;
+    AIDA::IDataPointSet* _histWZRatiomu;
+    AIDA::IDataPointSet* _histWZnormRatioelec;
+    AIDA::IDataPointSet* _histWZnormRatiomu;
+
   };
   
   AnalysisBuilder<CMS_EWK_10_012> plugin_CMS_EWK_10_012;
