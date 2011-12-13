@@ -185,4 +185,79 @@
       <measurement errorPlus="7.000000e-02" value="2.200000e-01" errorMinus="7.000000e-02"/>
     </dataPoint>
 </dataPointSet>
+<dataPointSet name="d11-x01-y01" dimension="2" path="/REF/CMS_EWK_10_012" title="W/Z">
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="1.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="5.226564e-01" value="1.084344e+01" errorMinus="5.226564e-01"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="2.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="1.277285e+00" value="1.142205e+01" errorMinus="1.277285e+00"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="3.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="2.642578e+00" value="1.033366e+01" errorMinus="2.642578e+00"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="4.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="5.951985e+00" value="9.883228e+00" errorMinus="5.951985e+00"/>
+    </dataPoint>
+</dataPointSet>
+<dataPointSet name="d12-x01-y01" dimension="2" path="/REF/CMS_EWK_10_012" title="W/Z">
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="1.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="1.023191e+00" value="1.093559e+01" errorMinus="1.023191e+00"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="2.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="1.714136e+00" value="1.157377e+01" errorMinus="1.714136e+00"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="3.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="3.545427e+00" value="1.171812e+01" errorMinus="3.545427e+00"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="4.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="5.682527e+00" value="8.133060e+00" errorMinus="5.682527e+00"/>
+    </dataPoint>
+</dataPointSet>
+
+<dataPointSet name="d13-x01-y01" dimension="2" path="/REF/CMS_EWK_10_012" title="WjZ/ZjW">
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="1.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="4.687211e-02" value="8.810036e-01" errorMinus="4.687211e-02"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="2.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="1.058604e-01" value="9.280141e-01" errorMinus="1.058604e-01"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="3.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="2.155343e-01" value="8.395851e-01" errorMinus="2.155343e-01"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="4.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="4.839226e-01" value="8.029886e-01" errorMinus="4.839226e-01"/>
+    </dataPoint>
+</dataPointSet>
+<dataPointSet name="d14-x01-y01" dimension="2" path="/REF/CMS_EWK_10_012" title="WjZ/ZjW">
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="1.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="9.404476e-02" value="9.145120e-01" errorMinus="9.404476e-02"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="2.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="1.491792e-01" value="9.678813e-01" errorMinus="1.491792e-01"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="3.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="2.994280e-01" value="9.799525e-01" errorMinus="2.994280e-01"/>
+    </dataPoint>
+    <dataPoint>
+      <measurement errorPlus="5.000000e-01" value="4.000000e+00" errorMinus="5.000000e-01"/>
+      <measurement errorPlus="4.760989e-01" value="6.801445e-01" errorMinus="4.760989e-01"/>
+    </dataPoint>
+</dataPointSet>
+
+
 </aida>

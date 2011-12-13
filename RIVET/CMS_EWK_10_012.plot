@@ -2,6 +2,7 @@
 Title=$\frac{\sigma(W->enu+\geq n-jets)}{\sigma(W->enu+\geq 0-jets)}$ in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=$\frac{\sigma(W+\geq n-jets)}{\sigma(W+\geq 0-jets)}$
+YMax=0.3
 FullRange=1
 LogY=1
 # END PLOT
@@ -18,6 +19,7 @@ LogY=0
 Title=$\frac{\sigma(W->munu+\geq n-jets)}{\sigma(W->munu+\geq 0-jets)}$ in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=$\frac{\sigma(W+\geq n-jets)}{\sigma(W+\geq 0-jets)}$
+YMax=0.3
 FullRange=1
 LogY=1
 # END PLOT
@@ -34,6 +36,7 @@ LogY=0
 Title=$\frac{\sigma(Zee+\geq n-jets)}{\sigma(Zee+\geq 0-jets)}$ in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=$\frac{\sigma(Z+\geq n-jets)}{\sigma(Z+\geq 0-jets)}$
+YMax=0.3
 FullRange=1
 LogY=1
 # END PLOT
@@ -50,6 +53,7 @@ LogY=0
 Title=$\frac{\sigma(Zmm+\geq n-jets)}{\sigma(Zmm+\geq 0-jets)}$ in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=$\frac{\sigma(Z+\geq n-jets)}{\sigma(Z+\geq 0-jets)}$
+YMax=0.3
 FullRange=1
 LogY=1
 # END PLOT
@@ -77,7 +81,43 @@ XLabel=Inclusive Jet Multiplicity, n
 YLabel=Charge asymmetry
 FullRange=1
 #YMin=0
-YMax=0.6
+YMax=0.35
+LogY=0
+# END PLOT
+# BEGIN PLOT /CMS_EWK_10_012/d11-x01-y01
+Title=ratio of W+ jets and Z + jets cross sections for the electron channels$
+XLabel=Inclusive Jet Multiplicity, n
+YLabel=$\frac{\sigma(W+\geq n-jets)}{\sigma(Z+\geq n-jets)}$
+FullRange=1
+#YMin=0
+YMax=25
+LogY=0
+# END PLOT
+# BEGIN PLOT /CMS_EWK_10_012/d12-x01-y01
+Title=ratio of W+ jets and Z + jets cross sections for the muon channels$
+XLabel=Inclusive Jet Multiplicity, n
+YLabel=$\frac{\sigma(W+\geq n-jets)}{\sigma(Z+\geq n-jets)}$
+FullRange=1
+#YMin=0
+YMax=25
+LogY=0
+# END PLOT
+# BEGIN PLOT /CMS_EWK_10_012/d13-x01-y01
+Title=ratio of W+ jets and Z + jets cross sections for the electron channels$
+XLabel=Inclusive Jet Multiplicity, n
+YLabel=$\frac{\sigma(W+\geq n-jets) \sigma(Z)}{\sigma(Z+\geq n-jets) \sigma(W)}$
+FullRange=1
+#YMin=0
+YMax=2
+LogY=0
+# END PLOT
+# BEGIN PLOT /CMS_EWK_10_012/d14-x01-y01
+Title=ratio of W+ jets and Z + jets cross sections for the muon channels$
+XLabel=Inclusive Jet Multiplicity, n
+YLabel=$\frac{\sigma(W+\geq n-jets) \sigma(Z)}{\sigma(Z+\geq n-jets) \sigma(W)}$
+FullRange=1
+#YMin=0
+YMax=2
 LogY=0
 # END PLOT
 
