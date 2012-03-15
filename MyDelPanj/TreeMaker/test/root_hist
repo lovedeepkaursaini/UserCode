@@ -1,0 +1,167 @@
+.x /afs/hep.wisc.edu/cms/cmsprod/bin/mergeFiles.C("lessUnFoldDY.root","/scratch/kaur/lessUnFoldDY")
+.x /afs/hep.wisc.edu/cms/cmsprod/bin/mergeFiles.C("/scratch/kaur/lessUnFoldDY.root","/scratch/kaur/lessUnFoldDY")
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/UnFoldTreeDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauolaSummer11-PU_S4_START42_V11-v1_Dec20-condorUnfoldingSampleMaker_cfg/condorUnfoldingSampleMaker_cfg-Electrons_PF2PAT_onMC-024A1569-ED9C-E011-988B-E0CB4E29C4B7.root")
+.q
+TFile *_file0 = TFile::Open("/scratch/kaur/zeeSmall.root")
+_file0->ls()
+TTree* tre1 = _file0->Get("tree")
+tre1->ls()
+tre1->Print()
+tre1->Print()
+TTree* tre1 = (TTree*) _file0->Get("tree")
+tre1->Print()
+gDirectory->cd("tree")
+gDirectory->cd("tree")
+gDirectory->cd("tree")
+gDirectory->cd("tree")
+gDirectory->cd("tree")
+TTree* tre1 = (TTree*) _file0->Get("tree")
+tre1->Print()
+ TTree* tr=_file0->Get("tree")
+ TTree* tr=_file0->Get("tree")
+ TTree* tr=_file0->Get("tree")
+ tr1->Print()
+ tr1->Print()
+ tr1->Print()
+ tr1->Print()
+ tr1->Print()
+ tr1->Print()
+ tr1->Print()
+ tr->Print()
+ tr->Print()
+ tr->Print()
+ tr->Print()
+ tr->Print()
+gDirectory->ls()
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/PlainTestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauolaSummer11-PU_S4_START42_V11-v1_Dec31-zjet_cfg/zjet_cfg-Electrons_PF2PAT_onMC-F8227D3E-5CA4-E011-947B-0030487C6A32.root")
+_file0.ls()
+_file0.cd("demo")
+_file0.ls()
+hZ11Mass->GetEntries()
+.q
+TFile *_file0 = TFile::Open("histo.root")
+_file0.ls()
+_file0.cd("tree")
+_file0.ls()
+tree->Print()
+tree->Draw("lepIsoRho_")
+TFile *_file0 = TFile::Open("histo.root")
+_file0.cd("tree")
+tree->SaveAs("lepIsoRho_")
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.ls()
+tree->GetEntries()
+_file0.cd("tree")
+tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/pf2pat442_DoubleElectron_Run2011A-05Aug2011-v1_DelPanj_Jan5_excbad-ElectronRun2011A_ReReco5Aug/ElectronRun2011A_ReReco5Aug-0030DDE9-24C0-E011-82FE-003048678FB8.root")
+Events->GetEntries()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/pf2pat442_DoubleElectron_Run2011A-05Jul2011ReReco-ECAL-v1_DelPanj_Jan12-ElectronRun2011A_05Jul2011ReReco-ECAL/ElectronRun2011A_05Jul2011ReReco-ECAL-004C163C-69A7-E011-ADEC-00261894392C.root")
+Events->GetEntries()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("/scratch/kaur/mrgdAnElecTreeData.root")
+_file0.cd("tree");tree->GetEntries()
+526663./(0.64*0.4)
+526663./(0.64*0.4*1e9)
+.q
+TFile *_file0 = TFile::Open("/scratch/kaur/mrgdAnElecTreeData.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("/scratch/kaur/zeeTest.root")
+_file0.ls()
+_file0.cd("demo")
+_file0.ls()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("zee.root")
+_file0.cd("tree");tree->GetEntries()
+..q
+.q
+TFile *_file0 = TFile::Open("root://cmsxrootd.hep.wisc.edu//store/mc/Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0001/FE00C119-C09C-E011-988B-485B39800BDF.root")
+TFile *_file0 = TFile::Open("root://cmsxrootd.hep.wisc.edu/store/mc/Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0001/FE00C119-C09C-E011-988B-485B39800BDF.root")
+TFile *_file0 = TFile::Open("/store/mc/Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0001/FE00C119-C09C-E011-988B-485B39800BDF.root")
+TFile *_file0 = TFile::Open("/hdfs/store/mc/Summer11/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0001/FE00C119-C09C-E011-988B-485B39800BDF.root")
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/data/Run2011A/DoubleElectron/AOD/05Aug2011-v1/0000/0030DDE9-24C0-E011-82FE-003048678FB8.root")
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+_file0.ls()
+_file0.cd("demo")
+_file0.ls()
+hZ0Mass->GetEntries()
+.q
+TFile *_file0 = TFile::Open("mrgdSych.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("check.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/FilterOff_pf2pat442isoON_DoubleElectron_Run2011A-05Aug2011-v1_DelPanj_Feb9-ElectronRun2011A_ReReco5Aug/1/ElectronRun2011A_ReReco5Aug-F2AFC37B-21C0-E011-9672-003048678FF6.root")
+Events->GetEntries()
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("SychzeeTest.root")
+TBrowser b
+TFile *_file0 = TFile::Open("zee.root")
+TBrowser  l
+TFile *_file0 = TFile::Open("zee.root")
+gDirectory->ls()
+.q
+.q
+TFile *_file0 = TFile::Open("/hdfs/store/user/kaur/AnilIsoStudy_QCD_EM_2030_Feb13-condorElecIsoTreeMaker_cfg/4/condorElecIsoTreeMaker_cfg-PF2PAT-0E03E329-438F-E011-A63C-00261894391B.root")
+_file0.ls()
+_file0.cd("tree")
+_file0.ls()
+tree->GetEntries()
+.q
+TFile *_file0 = TFile::Open("ZJets.root")
+TBrowser b
+.q
+TFile *_file0 = TFile::Open("ZJets.root")
+TBrowser b
+.q
+.L Scale.C 
+void Scale(zee,0.5)
+Scale(zee,0.5)
+Scale("zee",0.5)
+.q
+TFile *_file0 = TFile::Open("IsoOFF_patTuple_PF2PAT_442.root")
+.q
+TFile *_file0 = TFile::Open("IsoOFF_patTuple_PF2PAT_442.root")
+.q
