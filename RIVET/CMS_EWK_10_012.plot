@@ -71,7 +71,7 @@ Title=$W->enu$ Charge asymmetry in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=Charge asymmetry
 FullRange=1
-#YMin=0
+YMin=0
 YMax=0.6
 LogY=0
 # END PLOT
@@ -80,8 +80,8 @@ Title=$W->munu$ Charge asymmetry in CMS at $\sqrt(s)= 7 TeV$
 XLabel=Inclusive Jet Multiplicity, n
 YLabel=Charge asymmetry
 FullRange=1
-#YMin=0
-YMax=0.35
+YMin=0
+YMax=0.5
 LogY=0
 # END PLOT
 # BEGIN PLOT /CMS_EWK_10_012/d11-x01-y01

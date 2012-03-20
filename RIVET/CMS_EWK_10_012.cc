@@ -91,10 +91,10 @@ namespace Rivet {
       _histJetMultWelMinus = bookHistogram1D("njetWeMinus", 5, -0.5, 4.5);
       _histJetMultRatioWmuPlusMinus = bookDataPointSet(10, 1, 1);
       _histJetMultRatioWelPlusMinus = bookDataPointSet(9, 1, 1);
-      _histWZRatioelec = bookDataPointSet(11, 1, 1);
-      _histWZRatiomu = bookDataPointSet(12, 1, 1);
-      _histWZnormRatioelec = bookDataPointSet(13, 1, 1);
-      _histWZnormRatiomu = bookDataPointSet(14, 1, 1);
+//      _histWZRatioelec = bookDataPointSet(11, 1, 1);
+  //    _histWZRatiomu = bookDataPointSet(12, 1, 1);
+      _histWZnormRatioelec = bookDataPointSet(11, 1, 1);
+      _histWZnormRatiomu = bookDataPointSet(12, 1, 1);
 
     } 
       void GetPtEtaPhi(Particle p1, double& pt, double& eta,double& phi){
@@ -288,7 +288,7 @@ namespace Rivet {
  
     void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
       std::vector<double> yval, yerr;
-      for (int i = 0; i < 4; ++i) {
+      for (int i = 0; i < 4; i++) {
         std::vector<double> xval; xval.push_back(i);
         std::vector<double> xerr; xerr.push_back(.5);
         double ratio = 0;
@@ -303,9 +303,9 @@ namespace Rivet {
         if (den)ratio = num/den;
 	
         if(num)
-	  errNum = errNum*errNum/(num*num); 
-        if(den) 
-	  errDen = errDen*errDen/(den*den);
+	  errNum = errNum/(num*num); 
+        if(den)
+	  errDen = errDen/(den*den);
 	
         err = std::sqrt(errDen+errNum);
 	if(!(err==err))err=0;
@@ -449,10 +449,20 @@ namespace Rivet {
       FillNoverN0(_histJetMultZmu,_histNoverN0Zmu);
       FillChargeAssymHistogramSet(_histJetMultWmuPlus,_histJetMultWmuMinus, _histJetMultRatioWmuPlusMinus);
       FillChargeAssymHistogramSet(_histJetMultWelPlus,_histJetMultWelMinus, _histJetMultRatioWelPlusMinus);
-      FillWZRatioHistogramSet(_histJetMultWelec, _histJetMultZelec,_histWZRatioelec);
-      FillWZRatioHistogramSet(_histJetMultWmu, _histJetMultZmu,_histWZRatiomu);
+//      FillWZRatioHistogramSet(_histJetMultWelec, _histJetMultZelec,_histWZRatioelec);
+  //    FillWZRatioHistogramSet(_histJetMultWmu, _histJetMultZmu,_histWZRatiomu);
       FillWZnormRatioHistogramSet(_histJetMultWelec, _histJetMultZelec,_histWZnormRatioelec);
       FillWZnormRatioHistogramSet(_histJetMultWmu, _histJetMultZmu,_histWZnormRatiomu);
+AIDA::IHistogramFactory& hf = histogramFactory();
+hf.destroy(_histJetMultWelec);
+hf.destroy(_histJetMultWmu);
+hf.destroy(_histJetMultWelMinus);
+hf.destroy(_histJetMultWmuMinus);
+hf.destroy(_histJetMultWelPlus);
+hf.destroy(_histJetMultWmuPlus);
+hf.destroy(_histJetMultZelec);
+hf.destroy(_histJetMultZmu);
+
     }
 
   private:
@@ -481,8 +491,8 @@ namespace Rivet {
     AIDA::IDataPointSet* _histNoverNm1Zmu;          // n/(n-1)
     AIDA::IDataPointSet* _histNoverN0Zmu;          // n/n(0)
 
-    AIDA::IDataPointSet* _histWZRatioelec;
-    AIDA::IDataPointSet* _histWZRatiomu;
+//    AIDA::IDataPointSet* _histWZRatioelec;
+//    AIDA::IDataPointSet* _histWZRatiomu;
     AIDA::IDataPointSet* _histWZnormRatioelec;
     AIDA::IDataPointSet* _histWZnormRatiomu;
 
