@@ -29,38 +29,39 @@ namespace Rivet {
     /// Book histograms and initialise projections before the run
     void init() {
       
-      const FinalState fs(-MAXRAPIDITY,MAXRAPIDITY);
+      const FinalState fs(-5.0,5.0);
       addProjection(fs, "FS");
       
       // Zee
-      LeadingParticlesFinalState ZeeFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      LeadingParticlesFinalState ZeeFS(FinalState(-2.5,2.5, 0.)); 
       ZeeFS.addParticleIdPair(ELECTRON);
       addProjection(ZeeFS, "ZeeFS");
       // Zmm
-      LeadingParticlesFinalState ZmmFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      LeadingParticlesFinalState ZmmFS(FinalState(-2.4,2.4, 0.)); 
       ZmmFS.addParticleIdPair(MUON);
       addProjection(ZmmFS, "ZmmFS");
       
       // We-nu_e~
-      LeadingParticlesFinalState WminusenuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.)); 
+      LeadingParticlesFinalState WminusenuFS(FinalState(-2.5,2.5, 0.)); 
       WminusenuFS.addParticleId(ELECTRON).addParticleId(NU_EBAR);
       addProjection(WminusenuFS, "WminusenuFS");
       
       // We+nu_e
-      LeadingParticlesFinalState WplusenuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      LeadingParticlesFinalState WplusenuFS(FinalState(-2.5,2.5, 0.));
       WplusenuFS.addParticleId(POSITRON).addParticleId(NU_E);
       addProjection(WplusenuFS, "WplusenuFS");
       
       // Wm+nu_mu~
-      LeadingParticlesFinalState WplusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      LeadingParticlesFinalState WplusmunuFS(FinalState(-2.4,2.4, 0.));
       WplusmunuFS.addParticleId(ANTIMUON).addParticleId(NU_MU);
       addProjection(WplusmunuFS, "WplusmunuFS");
       
       // Wm-nu_mu
-      LeadingParticlesFinalState WminusmunuFS(FinalState(-MAXRAPIDITY,MAXRAPIDITY, 0.));
+      LeadingParticlesFinalState WminusmunuFS(FinalState(-2.4,2.4, 0.));
       WminusmunuFS.addParticleId(MUON).addParticleId(NU_MUBAR);
       addProjection(WminusmunuFS, "WminusmunuFS");
-      
+
+// Remove neutrinos for isolation of final state particles      
       VetoedFinalState vfs(fs);
       vfs.vetoNeutrinos();
       vfs.addVetoOnThisFinalState(ZeeFS);
@@ -70,6 +71,8 @@ namespace Rivet {
       vfs.addVetoOnThisFinalState(WplusenuFS);
       vfs.addVetoOnThisFinalState(WplusmunuFS);
       addProjection(vfs, "VFS");
+
+
       addProjection(FastJets(vfs, FastJets::ANTIKT, 0.5), "Jets");
       
       _histNoverN0Welec = bookDataPointSet(1,1,1);   
@@ -147,17 +150,31 @@ namespace Rivet {
 	else if(lepIndex==1) neut = Wdaughters[lepIndex-1];
         GetPtEtaPhi(Wdaughters[lepIndex],pt1,eta1,phi1);
         bool isFid = false;
-        if(lepton=="electron")isFid = ((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5)));
-        if(lepton=="muon") isFid = ((fabs(eta1)<2.1));
+        if(lepton=="electron")isFid = (((fabs(eta1)<1.4442)||((fabs(eta1)>1.566)&&(fabs(eta1)<2.5))) && pt1>20);
+        if(lepton=="muon") isFid = ((fabs(eta1)<2.1) && pt1>20);
         if(!isFid)return false;
-/*	double mt=sqrt(2.0*lep.momentum().pT()*neut.momentum().Et()*(1.0-cos(lep.momentum().phi()-neut.momentum().phi())));
-	if (mt<20)return false;*/
+//	double mt=sqrt(2.0*lep.momentum().pT()*neut.momentum().Et()*(1.0-cos(lep.momentum().phi()-neut.momentum().phi())));
+	//if (mt<20)return false;
 	return true;
-      }
+  
+}
+
+//pdgid
+// e- 11, nue 12, mu- 13, numu 14
+//why this GetLeptonIndex function?
+//Wdaughters[0] has -ve pdgid and Wdaughters[1] has +ve one
+//in order to apply acceptance cut on lepton, we want to know its id 
+//if Wdaughters[0] is lepton, we say order1 is true and return 0 as lepton index
+//if Wdaughters[1] is lepton, we say order2 is true and return 1 
+//now, if lepIndex is 0, means neutrino is at position 1, else if lepIndex is 1, neut. is at 0-position 
+//so, lepIndex is giving the lepton - Index and we use GetPtEtaPhi() to acess pt,eta,phi of lepton and apply acceptance cuts 
+//an example of Wdaughter's prop. [pdgid1: -12 (pt1)16.0846 , pdgid2: 11 (pt2)11.181]
       const int GetLeptonIndex(const LeadingParticlesFinalState& wFS){
 	const ParticleVector& Wdaughters = wFS.particles();
 	double pdgId1 = fabs(Wdaughters[0].pdgId());
 	double pdgId2 = fabs(Wdaughters[1].pdgId());
+        //cout<<"pdgid1: "<<Wdaughters[0].pdgId()<<" (pt1)"<<Wdaughters[0].momentum().pT()
+	//<<" , pdgid2: "<<Wdaughters[1].pdgId()<<" (pt2)"<<Wdaughters[1].momentum().pT()<<endl;
 	bool order1 = ((pdgId1==11&&pdgId2==12)||(pdgId1==13&&pdgId2==14));
 	bool order2 = ((pdgId1==12&&pdgId2==11)||(pdgId1==14&&pdgId2==13));
 	if(order1 && !order2) return 0;
@@ -207,9 +224,11 @@ namespace Rivet {
     
 
     void FillWZRatioHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12){ 
+      std::vector<double> yval, yerr;
+      std::vector<double> xval, xerr;
        for (int i = 0; i < 4; ++i) {
-        std::vector<double> xval; xval.push_back(i);
-        std::vector<double> xerr; xerr.push_back(.5);
+        xval.push_back(i);
+        xerr.push_back(.5);
         double ratioWZ = 0;
         double errWZ = 0.;
         if (_histJetMult2->binHeight(i) > 0.)
@@ -227,11 +246,12 @@ namespace Rivet {
           errW = delMult/mult;
         }
         errWZ = std::sqrt(std::pow(errW,2)+std::pow(errZ,2));
-        std::vector<double> yval;yval.push_back(ratioWZ);
-        std::vector<double> yerr;yerr.push_back(ratioWZ*errWZ);
+        yval.push_back(ratioWZ);
+        yerr.push_back(ratioWZ*errWZ);
+	}
         _histJetMultRatio12->setCoordinate(0,xval,xerr);
         _histJetMultRatio12->setCoordinate(1,yval,yerr);
-	}
+	
       }
 
 
@@ -288,9 +308,10 @@ namespace Rivet {
  
     void FillChargeAssymHistogramSet(  AIDA::IHistogram1D*& _histJetMult1,AIDA::IHistogram1D*& _histJetMult2, AIDA::IDataPointSet* _histJetMultRatio12 ){
       std::vector<double> yval, yerr;
-      for (int i = 0; i < 4; i++) {
-        std::vector<double> xval; xval.push_back(i);
-        std::vector<double> xerr; xerr.push_back(.5);
+      std::vector<double> xval, xerr;
+      for (int i = 0; i < 4; ++i) {
+        xval.push_back(i);
+        xerr.push_back(.5);
         double ratio = 0;
         double err = 0.;
         double num = _histJetMult1->binHeight(i)-_histJetMult2->binHeight(i);
@@ -312,6 +333,7 @@ namespace Rivet {
         yval.push_back(ratio);
         yerr.push_back(ratio*err);
         }
+      _histJetMultRatio12->setCoordinate(0,xval,xerr);
       _histJetMultRatio12->setCoordinate(1,yval,yerr);
     }
     
