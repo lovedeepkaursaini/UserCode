@@ -34,7 +34,7 @@ TriggerCandProducer<object>::TriggerCandProducer(const edm::ParameterSet& iConfi
   objEtMin_ = iConfig.getUntrackedParameter<double>("objEtMin",0.0);
   objEtaMax_ = iConfig.getUntrackedParameter<double>("objEtaMax",1000.0);
   isTriggerOR_ = iConfig.getUntrackedParameter<bool>("isTriggerOR",true);
-  isFilter_ = iConfig.getUntrackedParameter<bool>("isTriggerFilter",false);
+  isFilter_ = iConfig.getUntrackedParameter<bool>("isTriggerFilter",true);
   antiSelect_ = iConfig.getUntrackedParameter<bool>("antiSelect",false);
   noHltFiring_ = iConfig.getUntrackedParameter<bool>("noHltFiring",false);
 
@@ -127,7 +127,7 @@ void TriggerCandProducer<object>::produce(edm::Event &event, const edm::EventSet
      for (std::vector<edm::InputTag>::const_iterator iMyHLT = hltTags_.begin(); 
           iMyHLT != hltTags_.end(); ++iMyHLT) {
        if ((*iMyHLT).label() == *iHLT) {
-          std::cout<<(*iMyHLT).label()<<"\t"<<std::endl;
+//          std::cout<<(*iMyHLT).label()<<"\t"<<std::endl;
          triggerInMenu[(*iMyHLT).label()] = true;
       if (hltConfig_.prescaleValues(event, eventSetup, *iHLT).first == 1 && hltConfig_.prescaleValues(event, eventSetup, *iHLT).second == 1){ 
            triggerUnprescaled[(*iMyHLT).label()] = true;
