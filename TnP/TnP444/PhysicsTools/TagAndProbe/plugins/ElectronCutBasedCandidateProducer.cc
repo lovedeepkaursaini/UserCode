@@ -133,7 +133,7 @@ void ElectronCutBasedCandidateProducer::produce(edm::Event &event,
       double iso_ch =  (*(*electronIsoVals)[0])[myElectronRef];
       double iso_em = (*(*electronIsoVals)[1])[myElectronRef];
       double iso_nh = (*(*electronIsoVals)[2])[myElectronRef];
-std::cout<<iso_ch<<"\t"<<iso_em<<"\t"<<iso_nh<<std::endl;
+//std::cout<<iso_ch<<"\t"<<iso_em<<"\t"<<iso_nh<<std::endl;
       bool veto       = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::VETO, myElectronRef, 
                       conversions_h, beamSpot, vtx_h, iso_ch, iso_em, iso_nh, rhoIso);
       bool loose      = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::LOOSE, myElectronRef, 
@@ -143,7 +143,7 @@ std::cout<<iso_ch<<"\t"<<iso_em<<"\t"<<iso_nh<<std::endl;
       bool tight      = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::TIGHT, myElectronRef, 
                       conversions_h, beamSpot, vtx_h, iso_ch, iso_em, iso_nh, rhoIso);
 
-      std::cout<<"medium: "<<medium<<" run: "<<event.run()<<" event: "<<event.id().event()<<std::endl;
+//      std::cout<<"medium: "<<medium<<" run: "<<event.run()<<" event: "<<event.id().event()<<std::endl;
         // eop/fbrem cuts for extra tight ID
       bool fbremeopin = EgammaCutBasedEleId::PassEoverPCuts(myElectronRef);
 
